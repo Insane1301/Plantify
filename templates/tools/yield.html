@@ -1,0 +1,274 @@
+{% extends 'base.html' %} {% block title %}Plantify - Yield Predictor{% endblock
+%} {% block body %}
+<div class="max-w-4xl mx-auto space-y-8">
+  <div class="text-center md:text-left">
+    <h1 class="text-3xl font-bold text-gray-900">Crop Yield Predictor</h1>
+    <p class="text-gray-500 mt-2">
+      Estimate your harvest potential (Hg/Ha) based on environmental factors.
+    </p>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div
+      class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-8"
+    >
+      <form action="/tools/yield" method="POST" class="space-y-6">
+        <div>
+          <h3
+            class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2"
+          >
+            <i class="fas fa-seedling text-green-600"></i> Crop Details
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2"
+                >Crop Type</label
+              >
+              <select
+                name="Item"
+                required
+                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition"
+              >
+                <option value="" disabled selected>Select Crop</option>
+                <option value="Maize">Maize</option>
+                <option value="Potatoes">Potatoes</option>
+                <option value="Rice, paddy">Rice, paddy</option>
+                <option value="Sorghum">Sorghum</option>
+                <option value="Soybeans">Soybeans</option>
+                <option value="Wheat">Wheat</option>
+                <option value="Cassava">Cassava</option>
+                <option value="Sweet potatoes">Sweet potatoes</option>
+                <option value="Plantains and others">
+                  Plantains and others
+                </option>
+                <option value="Yams">Yams</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2"
+                >Avg Temperature (°C)</label
+              >
+              <input
+                type="number"
+                step="any"
+                name="avg_temp"
+                placeholder="e.g. 28.5"
+                required
+                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition"
+              />
+            </div>
+          </div>
+        </div>
+
+        <hr class="border-gray-100" />
+
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+              <i class="fas fa-cloud-rain text-blue-600"></i> Field Conditions
+            </h3>
+            <button
+              type="button"
+              id="autofill-weather-yield"
+              class="text-xs text-blue-600 font-medium hover:text-blue-700 flex items-center gap-1 bg-blue-50 px-3 py-1.5 rounded-full transition-colors"
+            >
+              <i class="fas fa-location-arrow"></i> Auto-fill with Local Weather
+            </button>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2"
+                >Rainfall (mm/year)</label
+              >
+              <input
+                type="number"
+                step="any"
+                name="average_rain_fall_mm_per_year"
+                placeholder="e.g. 1200"
+                required
+                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2"
+                >Pesticides (Tonnes)</label
+              >
+              <input
+                type="number"
+                step="any"
+                name="pesticides_tonnes"
+                placeholder="e.g. 50.5"
+                required
+                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2"
+                >Fertilizers Used (Kg/Ha)</label
+              >
+              <input
+                type="number"
+                step="any"
+                placeholder="e.g. 150"
+                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition"
+              />
+              <p class="text-xs text-gray-400 mt-1">For record keeping only.</p>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2"
+                >Total Farm Area (Hectares)</label
+              >
+              <input
+                type="number"
+                step="any"
+                placeholder="e.g. 5"
+                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition"
+              />
+              <p class="text-xs text-gray-400 mt-1">
+                Used to calculate total production.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          class="w-full bg-green-600 text-white font-bold py-4 rounded-xl hover:bg-green-700 transition shadow-lg shadow-green-200 flex justify-center items-center gap-2"
+        >
+          <span>Predict Yield</span>
+          <i class="fas fa-chart-line"></i>
+        </button>
+
+        <p
+          class="text-center text-[11px] text-gray-400 mt-6 flex items-center justify-center gap-1.5 px-4"
+        >
+          <i class="fas fa-robot text-[10px]"></i>
+          <span>
+            <b>Disclaimer:</b> Predictions are generated by an AI model based on
+            historical data from India. Accuracy is not 100% guaranteed.
+          </span>
+        </p>
+      </form>
+    </div>
+
+    <div class="lg:col-span-1 space-y-6">
+      {% if result %}
+      <div
+        class="bg-gradient-to-br from-green-600 to-green-800 rounded-2xl shadow-xl p-8 text-white animate-fade-in relative overflow-hidden"
+      >
+        <div
+          class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-white opacity-10 rounded-full blur-xl"
+        ></div>
+
+        <h3
+          class="text-green-100 font-medium uppercase tracking-wide text-sm mb-2"
+        >
+          Estimated Yield
+        </h3>
+        <div class="text-4xl font-bold mb-2">{{ result }}</div>
+        <p class="text-sm opacity-80 mb-6">Hectograms per Hectare (Hg/Ha)</p>
+
+        <div
+          class="bg-white/20 backdrop-blur-md rounded-lg p-3 text-[10px] flex items-center gap-2 border border-white/10"
+        >
+          <span>Model-generated result. Accuracy may vary.</span>
+        </div>
+
+        <div class="mt-4 pt-4 border-t border-white/20">
+          <p class="text-xs text-green-200">
+            Prediction based on historical data for India.
+          </p>
+        </div>
+      </div>
+      {% elif error %}
+      <div class="bg-red-50 border border-red-200 text-red-700 p-6 rounded-2xl">
+        <p class="font-bold">
+          <i class="fas fa-exclamation-triangle mr-2"></i> Error
+        </p>
+        <p class="text-sm mt-1">{{ error }}</p>
+      </div>
+      {% else %}
+      <div
+        class="bg-white border border-gray-100 p-8 rounded-2xl text-center text-gray-500 shadow-sm"
+      >
+        <i class="fas fa-balance-scale text-4xl mb-3 text-gray-300"></i>
+        <p>Fill out the form to generate a yield estimate.</p>
+      </div>
+      {% endif %}
+
+      <div class="bg-blue-50 border border-blue-100 p-6 rounded-2xl">
+        <h4 class="font-bold text-blue-800 mb-2 text-sm uppercase">
+          About this Tool
+        </h4>
+        <p class="text-sm text-blue-700 leading-relaxed">
+          This AI model analyzes historical rainfall, temperature, and pesticide
+          usage patterns in <b>India</b> to forecast crop productivity.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+{{ super() }}
+<script>
+  document
+    .getElementById("autofill-weather-yield")
+    ?.addEventListener("click", () => {
+      const btn = document.getElementById("autofill-weather-yield");
+      const originalContent = btn.innerHTML;
+
+      if (!navigator.geolocation) {
+        alert("Geolocation is not supported by your browser");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner animate-spin"></i> Fetching...';
+
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          try {
+            const response = await fetch("/api/get-weather", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                lat: position.coords.latitude,
+                lon: position.coords.longitude,
+              }),
+            });
+
+            const data = await response.json();
+            if (data.error) throw new Error(data.error);
+
+            document.getElementsByName("avg_temp")[0].value = data.annual_temp ?? "";
+            document.getElementsByName("average_rain_fall_mm_per_year")[0].value = data.annual_rainfall ?? "";
+
+            btn.innerHTML = '<i class="fas fa-check"></i> Done!';
+            setTimeout(() => {
+              btn.innerHTML = originalContent;
+              btn.disabled = false;
+            }, 2000);
+          } catch (error) {
+            console.error(error);
+            alert("Failed to fetch weather data");
+            btn.innerHTML = originalContent;
+            btn.disabled = false;
+          }
+        },
+        (error) => {
+          console.error(error);
+          alert("Please allow location access to use this feature");
+          btn.innerHTML = originalContent;
+          btn.disabled = false;
+        }
+      );
+    });
+</script>
+{% endblock %}
+

@@ -1,0 +1,419 @@
+{% extends 'base.html' %} {% block title %}Plantify - Market Analysis{% endblock
+%} {% block body %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="space-y-6">
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
+    <div class="mb-8 text-center md:text-left">
+      <h1 class="text-3xl font-bold text-gray-900">Market Trends Analysis</h1>
+      <p class="text-gray-500 mt-2">
+        Search comprehensive records from the Agmarknet database.
+      </p>
+    </div>
+
+    <form
+      id="marketForm"
+      class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end"
+    >
+      <div class="md:col-span-4 relative">
+        <label class="block text-sm font-semibold text-gray-700 mb-2"
+          >Commodity</label
+        >
+        <div class="relative">
+          <span
+            class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400"
+          >
+            <i class="fas fa-search"></i>
+          </span>
+          <input
+            type="text"
+            id="commodityInput"
+            list="commodityList"
+            required
+            autocomplete="off"
+            class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition"
+            placeholder="Search commodity (e.g. Wheat)..."
+          />
+
+          <datalist id="commodityList">
+            {% for item in commodities %}
+            <option value="{{ item }}"></option>
+            {% endfor %}
+          </datalist>
+        </div>
+      </div>
+
+      <div class="md:col-span-3">
+        <label class="block text-sm font-semibold text-gray-700 mb-2"
+          >State</label
+        >
+        <select
+          id="stateSelect"
+          onchange="populateDistricts()"
+          required
+          class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition"
+        >
+          <option value="" disabled selected>Select State</option>
+        </select>
+      </div>
+
+      <div class="md:col-span-3">
+        <label class="block text-sm font-semibold text-gray-700 mb-2"
+          >Market / Mandi</label
+        >
+        <select
+          id="districtSelect"
+          class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <option value="">All Markets</option>
+        </select>
+      </div>
+
+      <div class="md:col-span-2">
+        <button
+          type="submit"
+          id="searchBtn"
+          class="w-full bg-green-600 text-white font-bold py-3 rounded-xl hover:bg-green-700 transition shadow-lg shadow-green-200 flex justify-center items-center gap-2"
+        >
+          <span>Get Data</span>
+          <i class="fas fa-chart-line"></i>
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div id="loadingState" class="hidden py-12 text-center">
+    <div
+      class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-green-500 border-t-transparent"
+    ></div>
+    <p class="text-gray-500 mt-4 font-medium">Querying database...</p>
+  </div>
+
+  <div id="resultsDashboard" class="hidden space-y-6 fade-in">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <div class="flex items-center gap-3 mb-2">
+          <div class="p-2 bg-blue-100 text-blue-600 rounded-lg">
+            <i class="fas fa-tag"></i>
+          </div>
+          <span class="text-xs font-bold text-gray-400 uppercase"
+            >Latest Price</span
+          >
+        </div>
+        <h3 class="text-3xl font-bold text-gray-900" id="resPrice">--</h3>
+        <p class="text-sm text-gray-500">₹ per Quintal</p>
+      </div>
+
+      <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <div class="flex items-center gap-3 mb-2">
+          <div class="p-2 bg-purple-100 text-purple-600 rounded-lg">
+            <i class="fas fa-chart-bar"></i>
+          </div>
+          <span class="text-xs font-bold text-gray-400 uppercase">Trend</span>
+        </div>
+        <h3 class="text-3xl font-bold" id="resTrend">--</h3>
+        <p class="text-sm" id="resChange">--</p>
+      </div>
+
+      <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <div class="flex items-center gap-3 mb-2">
+          <div class="p-2 bg-green-100 text-green-600 rounded-lg">
+            <i class="fas fa-arrow-up"></i>
+          </div>
+          <span class="text-xs font-bold text-gray-400 uppercase">Highest</span>
+        </div>
+        <h3 class="text-3xl font-bold text-gray-900" id="resHigh">--</h3>
+        <p class="text-sm text-gray-500">Recorded period</p>
+      </div>
+
+      <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <div class="flex items-center gap-3 mb-2">
+          <div class="p-2 bg-red-100 text-red-600 rounded-lg">
+            <i class="fas fa-arrow-down"></i>
+          </div>
+          <span class="text-xs font-bold text-gray-400 uppercase">Lowest</span>
+        </div>
+        <h3 class="text-3xl font-bold text-gray-900" id="resLow">--</h3>
+        <p class="text-sm text-gray-500">Recorded period</p>
+      </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+      <div class="flex justify-between items-center mb-6">
+        <div>
+          <h3 class="text-lg font-bold text-gray-800">Price Trend Graph</h3>
+          <p class="text-xs text-gray-500" id="chartLocation">--</p>
+        </div>
+      </div>
+      <div class="relative h-80 w-full">
+        <canvas id="marketChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .fade-in {
+    animation: fadeIn 0.4s ease-out;
+  }
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>
+
+<script>
+      const regionData = {{ locations | tojson | safe }};
+    Object.keys(regionData).forEach(state => {
+      regionData[state] = regionData[state].filter(market =>
+        market && market.trim() !== ""
+      );
+    });
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const stateSelect = document.getElementById("stateSelect");
+
+      const states = Object.keys(regionData).sort();
+
+      stateSelect.innerHTML = '<option value="" disabled selected>Select State</option>';
+
+      if (states.length === 0) {
+        const opt = document.createElement("option");
+        opt.text = "No Location Data Found";
+        stateSelect.add(opt);
+        stateSelect.disabled = true;
+      } else {
+        states.forEach((state) => {
+          const option = document.createElement("option");
+          option.value = state;
+          option.text = state;
+          stateSelect.appendChild(option);
+        });
+        stateSelect.disabled = false;
+      }
+    });
+
+    function populateDistricts() {
+      const stateSelect = document.getElementById("stateSelect");
+      const districtSelect = document.getElementById("districtSelect");
+      const selectedState = stateSelect.value;
+
+      districtSelect.innerHTML = '<option value="">All Markets</option>';
+
+      if (selectedState && regionData[selectedState]) {
+        const markets = regionData[selectedState].sort();
+        markets.forEach((market) => {
+          const option = document.createElement("option");
+          option.value = market;
+          option.text = market;
+          districtSelect.appendChild(option);
+        });
+        districtSelect.disabled = false;
+      } else {
+        districtSelect.disabled = true;
+      }
+    }
+
+    let myChart = null;
+
+    document
+      .getElementById("marketForm")
+      .addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const commodity = document.getElementById("commodityInput").value;
+        const state = document.getElementById("stateSelect").value;
+        const district = document.getElementById("districtSelect").value;
+
+        if (!commodity) {
+          alert("Please enter a commodity.");
+          return;
+        }
+        if (!state) {
+          alert("Please select a state.");
+          return;
+        }
+
+        document.getElementById("loadingState").classList.remove("hidden");
+        document.getElementById("resultsDashboard").classList.add("hidden");
+
+        try {
+          const response = await fetch("/api/market/search", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ commodity, state, district }),
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            updateUI(data);
+          } else {
+            alert(data.error || "No data available for this selection.");
+            document.getElementById("loadingState").classList.add("hidden");
+          }
+        } catch (err) {
+          console.error(err);
+          alert("Connection error. Please check your internet.");
+          document.getElementById("loadingState").classList.add("hidden");
+        }
+      });
+
+    function updateUI(data) {
+      document.getElementById("loadingState").classList.add("hidden");
+      document.getElementById("resultsDashboard").classList.remove("hidden");
+
+      const formatPrice = (p) => (p ? `₹${p}` : "--");
+      document.getElementById("resPrice").innerText = formatPrice(
+        data.latest_price
+      );
+      document.getElementById("resHigh").innerText = formatPrice(
+        data.highest_price
+      );
+      document.getElementById("resLow").innerText = formatPrice(
+        data.lowest_price
+      );
+      document.getElementById("chartLocation").innerText = `${
+        data.commodity
+      } in ${data.market || "All Markets"}, ${data.state}`;
+
+      const trendEl = document.getElementById("resTrend");
+      const changeEl = document.getElementById("resChange");
+
+      const pct = parseFloat(data.percentage_change);
+      const isPositive = pct >= 0;
+      const isAvailable = !isNaN(pct);
+
+      if (isAvailable) {
+        trendEl.innerHTML = `<span class="${
+          isPositive ? "text-green-600" : "text-red-500"
+        }">
+                  <i class="fas ${
+                    isPositive ? "fa-arrow-up" : "fa-arrow-down"
+                  } text-2xl mr-2"></i>
+                  ${isPositive ? "Upward" : "Downward"}
+              </span>`;
+
+        changeEl.innerHTML = `<span class="${
+          isPositive ? "text-green-600" : "text-red-500"
+        } font-bold">
+                  ${isPositive ? "+" : ""}${pct}%
+              </span> vs previous`;
+      } else {
+        trendEl.innerHTML = `<span class="text-gray-500">Stable</span>`;
+        changeEl.innerHTML = `<span class="text-gray-500">No trend data</span>`;
+      }
+
+      renderChart(data.prices || [], data.commodity);
+    }
+
+  function renderChart(prices, label) {
+    const ctx = document.getElementById("marketChart").getContext("2d");
+
+    let labels = [];
+    let dataPoints = [];
+
+    if (prices.length > 0) {
+      if (typeof prices[0] === "object") {
+        labels = prices.map((p) => p.arrival_date || p.date || "Record");
+        dataPoints = prices.map((p) =>
+          parseFloat(p.modal_price || p.price)
+        );
+      } else {
+        labels = prices.map((_, i) => `Day ${i + 1}`);
+        dataPoints = prices;
+      }
+    } else {
+      labels = ["No Data"];
+      dataPoints = [0];
+    }
+
+    const MAX_POINTS = 12;
+    if (dataPoints.length > MAX_POINTS) {
+      const step = Math.ceil(dataPoints.length / MAX_POINTS);
+      const reducedLabels = [];
+      const reducedData = [];
+
+      for (let i = 0; i < dataPoints.length; i += step) {
+        reducedLabels.push(labels[i]);
+        reducedData.push(dataPoints[i]);
+      }
+
+      labels = reducedLabels;
+      dataPoints = reducedData;
+    }
+
+    if (myChart instanceof Chart) {
+      myChart.destroy();
+    }
+
+    const gradient = ctx.createLinearGradient(0, 0, 0, 280);
+    gradient.addColorStop(0, "rgba(34, 197, 94, 0.35)");
+    gradient.addColorStop(1, "rgba(34, 197, 94, 0)");
+
+    myChart = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels,
+        datasets: [
+          {
+            label: `${label} Price (₹/Qtl)`,
+            data: dataPoints,
+            borderColor: "rgb(34, 197, 94)",
+            backgroundColor: gradient,
+            borderWidth: 2.5,
+            tension: 0.45,
+            fill: true,
+
+            pointRadius: 3,
+            pointHoverRadius: 5,
+            pointBackgroundColor: "#ffffff",
+            pointBorderColor: "rgb(34, 197, 94)",
+            pointBorderWidth: 2,
+          },
+        ],
+      },
+
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: "rgba(0,0,0,0.75)",
+            titleFont: { size: 12, weight: "600" },
+            bodyFont: { size: 12 },
+            padding: 10,
+            displayColors: false,
+            cornerRadius: 8,
+          },
+        },
+
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: { maxRotation: 0, font: { size: 11 } },
+          },
+          y: {
+            grid: {
+              color: "rgba(0,0,0,0.05)",
+              borderDash: [3, 3],
+            },
+            ticks: {
+              padding: 6,
+              font: { size: 11 },
+            },
+          },
+        },
+      },
+    });
+  }
+</script>
+{% endblock %}

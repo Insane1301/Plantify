@@ -1,0 +1,281 @@
+{% extends 'base.html' %} {% block title %}Plantify - Gov Schemes{% endblock %}
+{% block body %}
+<div class="max-w-6xl mx-auto space-y-8 pb-12">
+  <div
+    class="bg-gradient-to-br from-purple-900 to-indigo-900 rounded-3xl p-8 md:p-12 text-white text-center relative overflow-hidden shadow-2xl"
+  >
+    <div class="absolute top-0 right-0 opacity-10 pointer-events-none">
+      <i
+        class="fas fa-landmark text-9xl transform translate-x-10 -translate-y-10"
+      ></i>
+    </div>
+    <div class="absolute bottom-0 left-0 opacity-10 pointer-events-none">
+      <i
+        class="fas fa-hand-holding-usd text-8xl transform -translate-x-10 translate-y-10"
+      ></i>
+    </div>
+
+    <h1 class="text-3xl md:text-5xl font-bold mb-4 tracking-tight">
+      Government Scheme Finder
+    </h1>
+    <p class="text-purple-200 mb-8 max-w-2xl mx-auto text-lg">
+      Discover financial aid, insurance, and subsidies tailored specifically to
+      your farm's profile.
+    </p>
+
+    <div class="max-w-2xl mx-auto relative z-10">
+      <div class="relative group">
+        <input
+          type="text"
+          id="schemeSearch"
+          class="w-full pl-14 pr-4 py-4 rounded-full text-gray-800 bg-white/95 backdrop-blur focus:outline-none focus:ring-4 focus:ring-purple-400/50 shadow-xl text-lg transition-all"
+          placeholder="Search e.g., 'Crop Insurance', 'Loan', 'Subsidy'..."
+        />
+        <i
+          class="fas fa-search absolute left-6 top-1/2 transform -translate-y-1/2 text-purple-600 text-xl"
+        ></i>
+      </div>
+    </div>
+
+    <div
+      class="mt-6 flex flex-wrap justify-center gap-3 text-sm text-purple-200"
+    >
+      <span class="opacity-75">Quick Filters:</span>
+      <button
+        onclick="quickSearch('Kisan Credit')"
+        class="bg-white/10 hover:bg-white/20 px-3 py-1 rounded-full transition"
+      >
+        Kisan Credit
+      </button>
+      <button
+        onclick="quickSearch('Insurance')"
+        class="bg-white/10 hover:bg-white/20 px-3 py-1 rounded-full transition"
+      >
+        Insurance
+      </button>
+      <button
+        onclick="quickSearch('Subsidy')"
+        class="bg-white/10 hover:bg-white/20 px-3 py-1 rounded-full transition"
+      >
+        Subsidies
+      </button>
+    </div>
+  </div>
+
+  <div class="min-h-[400px]">
+    <div
+      class="flex flex-col sm:flex-row justify-between items-end sm:items-center mb-6 gap-4"
+    >
+      <div>
+        <h2 id="resultsTitle" class="text-2xl font-bold text-gray-800">
+          Recommended for You
+        </h2>
+        <p id="resultsSub" class="text-sm text-gray-500">
+          Based on your profile data
+        </p>
+      </div>
+      <span
+        id="resultCount"
+        class="text-sm font-semibold bg-purple-100 text-purple-700 px-4 py-2 rounded-full border border-purple-200"
+      >
+        Loading...
+      </span>
+    </div>
+
+    <div id="loader" class="hidden py-20 text-center">
+      <div
+        class="animate-spin rounded-full h-12 w-12 border-4 border-purple-200 border-t-purple-600 mx-auto"
+      ></div>
+      <p class="text-gray-500 mt-4 font-medium animate-pulse">
+        Analyzing your eligibility...
+      </p>
+    </div>
+
+    <div
+      id="schemeGrid"
+      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 animate-fade-in-up"
+    ></div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    performSearch("");
+  });
+
+  let timeout = null;
+  document
+    .getElementById("schemeSearch")
+    .addEventListener("input", function (e) {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        performSearch(e.target.value);
+      }, 400);
+    });
+
+  function quickSearch(term) {
+    const input = document.getElementById("schemeSearch");
+    input.value = term;
+    performSearch(term);
+  }
+
+  async function performSearch(query) {
+    const grid = document.getElementById("schemeGrid");
+    const loader = document.getElementById("loader");
+    const countBadge = document.getElementById("resultCount");
+    const title = document.getElementById("resultsTitle");
+    const subtitle = document.getElementById("resultsSub");
+
+    if (query.trim() === "") {
+      title.innerText = "Recommended for You";
+      subtitle.innerText = "Schemes matched to your profile & crops";
+    } else {
+      title.innerText = "Search Results";
+      subtitle.innerText = `Showing results for "${query}"`;
+    }
+
+    grid.innerHTML = "";
+    grid.classList.add("hidden");
+    loader.classList.remove("hidden");
+    countBadge.innerText = "Scanning...";
+
+    try {
+      const response = await fetch("/api/schemes/search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: query }),
+      });
+
+      const schemes = await response.json();
+
+      loader.classList.add("hidden");
+      grid.classList.remove("hidden");
+      countBadge.innerText = `${schemes.length} Schemes Found`;
+
+      if (schemes.length === 0) {
+        grid.innerHTML = `
+            <div class="col-span-full bg-gray-50 rounded-2xl p-12 text-center border-2 border-dashed border-gray-200">
+                <div class="bg-gray-100 h-20 w-20 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400">
+                    <i class="fas fa-search text-3xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-700">No schemes found</h3>
+                <p class="text-gray-500">Try adjusting your search terms or updating your profile.</p>
+            </div>
+        `;
+        return;
+      }
+
+      schemes.forEach((scheme, index) => {
+        const card = createSchemeCard(scheme, index);
+        grid.innerHTML += card;
+      });
+    } catch (error) {
+      console.error(error);
+      loader.classList.add("hidden");
+      grid.classList.remove("hidden");
+      grid.innerHTML = `
+        <div class="col-span-full text-center py-10">
+            <p class="text-red-500 font-bold">Unable to load schemes.</p>
+            <p class="text-sm text-gray-500">Please try again later.</p>
+        </div>`;
+    }
+  }
+
+  function createSchemeCard(scheme, index) {
+    const isEligible = scheme.is_eligible;
+    const badgeColor = isEligible
+      ? "bg-green-100 text-green-700 border-green-200"
+      : "bg-red-50 text-red-600 border-red-100";
+    const icon = isEligible ? "fa-check-circle" : "fa-times-circle";
+    const text = isEligible ? "Eligible" : "Not Eligible";
+    const cardBorder = isEligible
+      ? "border-green-200 ring-4 ring-green-50/50"
+      : "border-gray-100";
+
+    let benefitsHtml = "";
+    if (scheme.special_benefits && scheme.special_benefits.length > 0) {
+      benefitsHtml = `
+        <div class="mt-4 pt-4 border-t border-gray-100">
+            <p class="text-xs font-bold text-gray-500 uppercase mb-2">Key Benefits</p>
+            <ul class="space-y-1">
+                ${scheme.special_benefits
+                  .slice(0, 2)
+                  .map(
+                    (b) => `
+                    <li class="text-xs text-gray-600 flex items-start gap-2">
+                        <i class="fas fa-star text-yellow-400 mt-0.5"></i> ${b}
+                    </li>
+                `,
+                  )
+                  .join("")}
+            </ul>
+        </div>`;
+    }
+
+    return `
+        <div class="bg-white rounded-2xl shadow-sm border ${cardBorder} p-6 hover:shadow-lg transition-all duration-300 flex flex-col h-full relative overflow-hidden group">
+            
+            ${
+              isEligible
+                ? '<div class="absolute top-0 right-0 w-16 h-16 bg-green-500/10 rounded-bl-full -mr-8 -mt-8 z-0"></div>'
+                : ""
+            }
+
+            <div class="flex justify-between items-start mb-4 relative z-10">
+                <div class="flex-1 pr-4">
+                    <span class="inline-block text-[10px] font-bold tracking-wider text-purple-600 bg-purple-50 px-2 py-1 rounded-md uppercase mb-2 border border-purple-100">
+                        ${scheme.category}
+                    </span>
+                    <h3 class="text-lg font-bold text-gray-900 leading-tight group-hover:text-purple-700 transition-colors">
+                        ${scheme.title}
+                    </h3>
+                </div>
+                <span class="shrink-0 whitespace-nowrap ${badgeColor} text-xs px-2.5 py-1 rounded-full font-bold border flex items-center gap-1.5">
+                    <i class="fas ${icon}"></i> ${text}
+                </span>
+            </div>
+
+            <p class="text-gray-600 text-sm mb-4 line-clamp-2 leading-relaxed">
+                ${scheme.description}
+            </p>
+            
+            <!-- Eligibility Reason -->
+            <div class="bg-gray-50 rounded-lg p-3 mb-2 text-xs font-medium ${
+              isEligible ? "text-green-700" : "text-red-600"
+            } flex items-start gap-2">
+                <i class="fas fa-info-circle mt-0.5 shrink-0"></i>
+                <span>${scheme.eligibility_note}</span>
+            </div>
+
+            ${benefitsHtml}
+
+            <div class="mt-auto pt-5 flex items-center justify-between">
+                <span class="text-xs text-gray-400 font-medium">${
+                  scheme.source_organization
+                }</span>
+                <a href="${scheme.source_url}" target="_blank" 
+                   class="bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-purple-600 transition-colors shadow-lg shadow-gray-200 flex items-center gap-2">
+                    Details <i class="fas fa-arrow-right text-xs"></i>
+                </a>
+            </div>
+        </div>
+    `;
+  }
+</script>
+
+<style>
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .animate-fade-in-up {
+    animation: fadeInUp 0.5s ease-out;
+  }
+</style>
+{% endblock %}

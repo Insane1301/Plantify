@@ -1,0 +1,106 @@
+{% extends 'base.html' %} {% block title %}Plantify - Supplement Market{%
+endblock %} {% block body %}
+<section id="market" class="py-6 bg-gradient-to-b from-gray-50 to-gray-100">
+  <div class="container mx-auto px-6">
+    <div class="text-center mb-12">
+      <h2 class="text-4xl font-bold tracking-tight text-gray-900">
+        Supplement Marketplace
+      </h2>
+      <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
+        Browse supplements and fertilizers for healthy or diseased plants.
+      </p>
+    </div>
+
+    <div class="flex flex-wrap justify-center gap-4 mb-12">
+      <button
+        data-filter="all"
+        class="filter-btn active px-5 py-2 border border-green-600 text-white bg-green-600 rounded-full transition"
+      >
+        All
+      </button>
+      <button
+        data-filter="healthy"
+        class="filter-btn px-5 py-2 border border-green-600 text-green-600 rounded-full hover:bg-green-600 hover:text-white transition"
+      >
+        Healthy Plants
+      </button>
+      <button
+        data-filter="diseased"
+        class="filter-btn px-5 py-2 border border-green-600 text-green-600 rounded-full hover:bg-green-600 hover:text-white transition"
+      >
+        Disease Control
+      </button>
+    </div>
+
+    <div
+      id="product-grid"
+      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+    >
+      {% for product in products %}
+      <div
+        class="product-card bg-white rounded-lg shadow hover:shadow-lg transition flex flex-col h-full {% if product.type == 'healthy' %}healthy{% else %}diseased{% endif %}"
+      >
+        <div class="h-48 overflow-hidden rounded-t-lg bg-gray-200">
+          <img
+            src="{{ product.image }}"
+            alt="{{ product.name }}"
+            loading="lazy"
+            class="w-full h-full object-cover hover:scale-105 transition duration-500"
+          />
+        </div>
+
+        <div class="p-5 flex flex-col flex-grow">
+          <h4 class="font-bold text-gray-800 mb-2 line-clamp-2">
+            {{ product.name }}
+          </h4>
+
+          {% if product.type == 'healthy' %}
+          <p class="text-xs text-gray-500 mb-4">
+            <span class="text-green-600 font-semibold">For Growth</span>
+          </p>
+          {% else %}
+          <p class="text-xs text-gray-500 mb-4">
+            <span class="text-red-600 font-semibold">Disease Control</span>
+          </p>
+          {% endif %}
+
+          <div class="mt-auto">
+            <a
+              href="{{ product.purchase_url }}"
+              target="_blank"
+              class="block w-full text-center bg-gray-900 text-white py-2 rounded-lg hover:bg-gray-800 transition"
+            >
+              <i class="fas fa-external-link-alt text-xs mr-2"></i> Buy Now
+            </a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<script>
+  const filterButtons = document.querySelectorAll(".filter-btn");
+  const productCards = document.querySelectorAll(".product-card");
+
+  filterButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      filterButtons.forEach((b) =>
+        b.classList.remove("active", "bg-green-600", "text-white")
+      );
+      btn.classList.add("active", "bg-green-600", "text-white");
+
+      const filter = btn.getAttribute("data-filter");
+
+      productCards.forEach((card) => {
+        if (filter === "all" || card.classList.contains(filter)) {
+          card.style.display = "flex";
+        } else {
+          card.style.display = "none";
+        }
+      });
+    });
+  });
+</script>
+{% endblock %}

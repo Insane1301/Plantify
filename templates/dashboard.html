@@ -1,0 +1,452 @@
+{% extends 'base.html' %} {% block title %}Plantify - Farmer Dashboard{%
+endblock %} {% block body %}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+  <div
+    class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 relative w-full h-full flex flex-col justify-start"
+  >
+    <div
+      id="weather-loading"
+      class="absolute inset-0 bg-white z-10 flex items-center justify-center text-gray-400"
+    >
+      <i class="fas fa-circle-notch fa-spin text-xl"></i>
+    </div>
+
+    <div class="flex justify-between items-start mb-3">
+      <div class="flex flex-col">
+        <h3 class="text-3xl font-bold text-gray-800">
+          <span id="weather-temp">--</span>°C
+        </h3>
+        <p class="text-sm font-medium text-gray-500 mt-0">
+          <span id="weather-city" class="text-gray-700 truncate"
+            >Locating...</span
+          >
+        </p>
+      </div>
+
+      <div class="flex flex-col items-end">
+        <div
+          class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 transition-colors duration-300 mb-1"
+          id="weather-icon-bg"
+        >
+          <i id="weather-icon" class="fas fa-cloud-sun text-lg"></i>
+        </div>
+        <span class="text-xs font-bold text-gray-400 uppercase">Weather</span>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-4 gap-2 pt-1 border-t border-gray-100 mt-auto">
+      <div class="text-center">
+        <p class="text-xs font-medium text-gray-500 uppercase">Hum.</p>
+        <p class="text-sm font-bold text-gray-800">
+          <span id="weather-humidity">--</span>%
+        </p>
+      </div>
+      <div class="text-center">
+        <p class="text-xs font-medium text-gray-500 uppercase">Soil T.</p>
+        <p class="text-sm font-bold text-gray-800">
+          <span id="weather-soil-temp">--</span>°C
+        </p>
+      </div>
+      <div class="text-center">
+        <p class="text-xs font-medium text-gray-500 uppercase">Rain</p>
+        <p class="text-sm font-bold text-gray-800">
+          <span id="weather-rainfall">--</span> mm
+        </p>
+      </div>
+
+      <div class="text-center">
+        <p class="text-xs font-medium text-gray-500 uppercase">Wind</p>
+        <p class="text-sm font-bold text-gray-800">
+          <span id="weather-wind-speed">--</span> km/h
+        </p>
+      </div>
+    </div>
+  </div>
+  <div
+    class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 h-full flex flex-col justify-between"
+  >
+    {% if last_scan %}
+    <div class="flex justify-between items-center mb-4">
+      <div
+        class="w-10 h-10 rounded-full flex items-center justify-center {% if last_scan.is_healthy %} bg-green-100 text-green-600 {% else %} bg-red-100 text-red-600 {% endif %}"
+      >
+        <i
+          class="fas {% if last_scan.is_healthy %} fa-check-circle {% else %} fa-exclamation-triangle {% endif %}"
+        ></i>
+      </div>
+      <span class="text-xs font-bold text-gray-400 uppercase">Last Scan</span>
+    </div>
+
+    <div>
+      <h3 class="text-lg font-bold text-gray-800">
+        {{ last_scan.plant_name }} Leaf
+      </h3>
+
+      {% if last_scan.is_healthy %}
+      <p class="text-sm font-medium text-green-600">Result: Healthy</p>
+      {% else %}
+      <p class="text-sm text-gray-500">
+        Detected:
+        <span class="font-bold text-red-500">{{ last_scan.disease_name }}</span>
+      </p>
+      {% endif %}
+
+      <p class="text-xs text-gray-400 mt-1">{{ last_scan.created_at[:10] }}</p>
+    </div>
+
+    {% else %}
+    <div class="flex justify-between items-center mb-4">
+      <div
+        class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-400"
+      >
+        <i class="fas fa-history"></i>
+      </div>
+      <span class="text-xs font-bold text-gray-400 uppercase">Last Scan</span>
+    </div>
+    <div>
+      <h3 class="text-lg font-bold text-gray-400">No Activity</h3>
+      <p class="text-sm text-gray-400">Upload a photo to start.</p>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+    <div class="flex justify-between items-center mb-4">
+      <div
+        id="gainer-icon-bg"
+        class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-400"
+      >
+        <i id="gainer-icon" class="fas fa-minus"></i>
+      </div>
+      <span class="text-xs font-bold text-gray-400 uppercase">Top Gainer</span>
+    </div>
+    <h3 id="gainer-name" class="text-2xl font-bold text-gray-800">--</h3>
+    <p id="gainer-stat" class="text-sm text-gray-500">Loading data...</p>
+  </div>
+
+  <div
+    class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition cursor-pointer"
+    onclick="window.location.href='/tools/yield'"
+  >
+    <div class="flex justify-between items-center mb-4">
+      <div
+        class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600"
+      >
+        <i class="fas fa-calculator"></i>
+      </div>
+      <span class="text-xs font-bold text-gray-400 uppercase">Tool</span>
+    </div>
+    <h3 class="text-lg font-bold text-gray-800">Yield Predictor</h3>
+    <p class="text-sm text-gray-500">Estimate your harvest &rarr;</p>
+  </div>
+</div>
+
+{% if not is_profile_complete %}
+<div
+  class="bg-yellow-50 border-l-4 border-yellow-500 p-4 mb-8 rounded-lg shadow-md flex items-center justify-between"
+>
+  <div class="flex items-center">
+    <i class="fas fa-user-edit text-yellow-600 text-2xl mr-4"></i>
+    <div>
+      <p class="font-bold text-yellow-800">Complete Your Profile</p>
+      <p class="text-sm text-yellow-700">
+        Unlock personalized recommendations for schemes and crops by finishing
+        your profile.
+      </p>
+    </div>
+  </div>
+  <a
+    href="/profile"
+    class="bg-yellow-500 text-white px-4 py-2 rounded-full text-sm font-medium hover:bg-yellow-600 transition flex-shrink-0"
+  >
+    Go to Profile &rarr;
+  </a>
+</div>
+{% endif %}
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <div
+    class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden"
+  >
+    <div
+      class="px-6 py-4 border-b border-gray-100 flex justify-between items-center"
+    >
+      <h3 class="font-bold text-gray-800">Live Mandi Prices</h3>
+      <a
+        href="/market"
+        class="text-green-600 text-sm font-semibold hover:underline"
+        >View All</a
+      >
+    </div>
+    <div class="overflow-x-auto">
+      <table
+        class="w-full min-w-[900px] text-left text-gray-600 whitespace-nowrap"
+      >
+        <thead class="bg-gray-50 text-xs uppercase text-gray-500 font-semibold">
+          <tr>
+            <th class="px-6 py-3">Commodity</th>
+            <th class="px-6 py-3">Market</th>
+            <th class="px-6 py-3">Price (₹/Qtl)</th>
+            <th class="px-6 py-3">Trend</th>
+          </tr>
+        </thead>
+        <tbody id="mandi-table-body" class="divide-y divide-gray-100 text-sm">
+          <tr>
+            <td colspan="4" class="px-6 py-4 text-center text-gray-400">
+              Loading live prices...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div
+    class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col h-full"
+  >
+    <h3 class="font-bold text-gray-800 mb-4">Updates</h3>
+
+    <div
+      class="space-y-4 flex-1 overflow-y-auto max-h-96 pr-2 custom-scrollbar"
+    >
+      <div id="advisory-bulletin-container"></div>
+
+      <div class="border-l-4 border-red-500 bg-red-50 pl-4 py-3 rounded-r-lg">
+        <p class="text-xs text-red-700 font-bold mb-1">Urgent Warning</p>
+        <h4 class="text-sm font-bold text-gray-900">
+          Pesticide Residue Alert for Basmati Farmers
+        </h4>
+        <p class="text-xs text-gray-600 mt-1">
+          Basmati rice exports face severe EU restrictions due to pesticide
+          residues. Check if you're using any of the 11 banned chemicals to
+          avoid shipment rejections.
+        </p>
+        <a
+          href="https://www.stayfeatured.com/post/india-urgently-needs-a-national-soil-health-policy-experts-warn-as-pesticide-residues-threaten-5"
+          target="_blank"
+          class="text-xs font-bold text-red-700 mt-2 block hover:underline"
+          >Read More</a
+        >
+      </div>
+
+      <div
+        class="border-l-4 border-green-500 bg-green-50 pl-4 py-3 rounded-r-lg"
+      >
+        <p class="text-xs text-green-700 font-bold mb-1">Update</p>
+        <h4 class="text-sm font-bold text-gray-900">PM Kisan Samman Nidhi</h4>
+        <p class="text-xs text-gray-600 mt-1">
+          Financial assistance of ₹6,000 per year to small and marginal farmers.
+          Check eligibility and latest guidelines.
+        </p>
+        <a
+          href="/schemes"
+          class="text-xs font-bold text-green-700 mt-2 block hover:underline"
+          >Read More</a
+        >
+      </div>
+
+      <div
+        class="border-l-4 border-orange-500 bg-orange-50 pl-4 py-3 rounded-r-lg"
+      >
+        <p class="text-xs text-orange-700 font-bold mb-1">Announcement</p>
+        <h4 class="text-sm font-bold text-gray-900">
+          Pradhan Mantri Fasal Bima Yojana
+        </h4>
+        <p class="text-xs text-gray-600 mt-1">
+          Crop insurance scheme to protect farmers from losses due to natural
+          calamities. Enrollment for this season is open.
+        </p>
+        <a
+          href="/schemes"
+          class="text-xs font-bold text-orange-700 mt-2 block hover:underline"
+          >Read More</a
+        >
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      initWeather();
+      fetchMandiPrices();
+    });
+
+    function initWeather() {
+      const savedCoords = localStorage.getItem("coords");
+
+      if (savedCoords) {
+        const { lat, lon } = JSON.parse(savedCoords);
+        fetchWeather({ coords: { latitude: lat, longitude: lon } });
+      } else {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            function (position) {
+              const lat = position.coords.latitude;
+              const lon = position.coords.longitude;
+              localStorage.setItem(
+                "coords",
+                JSON.stringify({ lat: lat, lon: lon })
+              );
+
+              fetchWeather(position);
+            },
+            function (error) {
+              console.warn(
+                "Geolocation failed or denied. Using default Cords."
+              );
+              useDefaultCords();
+            }
+          );
+        } else {
+          console.warn("Geolocation not supported. Using default Cords.");
+          useDefaultCords();
+        }
+      }
+    }
+
+    function useDefaultCords() {
+      const defaultLat = 13.0827;
+      const defaultLon = 80.2707;
+      fetchWeather({ coords: { latitude: defaultLat, longitude: defaultLon } });
+    }
+
+    function updateNewsBulletin(advisories) {
+      const container = document.getElementById("advisory-bulletin-container");
+      container.innerHTML = "";
+
+      if (advisories && advisories.length > 0) {
+        const advisoryHtml = `
+                <div class="border-l-4 border-yellow-500 bg-yellow-50 pl-4 py-3 rounded-r-lg">
+                    <p class="text-xs text-yellow-700 font-bold mb-1">Weather Advisory</p>
+                    ${advisories
+                      .map(
+                        (advisory) =>
+                          `<p class="text-xs text-gray-700 mt-1">${advisory}</p>`
+                      )
+                      .join("")}
+                    <a
+                      href="#"
+                      class="text-xs font-bold text-yellow-700 mt-2 block hover:underline"
+                      >View Full Forecast</a
+                    >
+                </div>
+            `;
+        container.innerHTML = advisoryHtml;
+      }
+    }
+
+    function fetchWeather(position) {
+      const lat = position.coords.latitude;
+      const lon = position.coords.longitude;
+
+      fetch("/api/get-weather", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lat: lat, lon: lon }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.error) return;
+
+          document.getElementById("weather-temp").innerText = data.temp;
+          document.getElementById("weather-city").innerText = data.city;
+
+          document.getElementById("weather-humidity").innerText = data.humidity;
+          document.getElementById("weather-soil-temp").innerText =
+            data.soil_temp || "--";
+          document.getElementById("weather-rainfall").innerText =
+            data.rainfall || "0";
+          document.getElementById("weather-wind-speed").innerText =
+            data.wind_speed || "0";
+
+          updateNewsBulletin(data.advisory);
+
+          const iconEl = document.getElementById("weather-icon");
+          iconEl.className = data.icon;
+          document.getElementById("weather-loading").style.display = "none";
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          document.getElementById("weather-city").innerText = "Chennai";
+          document.getElementById("weather-loading").style.display = "none";
+        });
+    }
+
+    function showError(error) {
+      document.getElementById("weather-loading").style.display = "none";
+      document.getElementById("weather-temp").innerText = "--";
+    }
+
+    function fetchMandiPrices() {
+      fetch("/api/market/trends")
+        .then((response) => response.json())
+        .then((data) => {
+          const tableBody = document.getElementById("mandi-table-body");
+          tableBody.innerHTML = "";
+
+          if (data.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="4" class="px-6 py-4 text-center">No data.</td></tr>`;
+            document.getElementById("gainer-stat").innerText =
+              "No data available";
+            return;
+          }
+
+          data.forEach((item) => {
+            let trendColor = "text-gray-500";
+            let trendIcon = "fa-minus";
+            let changeText = "0.0%";
+
+            if (item.trend === "upward" || item.change > 0) {
+              trendColor = "text-green-600";
+              trendIcon = "fa-arrow-up";
+              changeText = "+" + item.change + "%";
+            } else if (item.trend === "downward" || item.change < 0) {
+              trendColor = "text-red-500";
+              trendIcon = "fa-arrow-down";
+              changeText = item.change + "%";
+            }
+
+            const row = `
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="px-6 py-4 font-medium text-gray-800 capitalize">${item.commodity}</td>
+                        <td class="px-6 py-4 text-gray-600 capitalize">${item.market}</td>
+                        <td class="px-6 py-4 font-bold text-gray-900">₹${item.price}</td>
+                        <td class="px-6 py-4 ${trendColor} font-medium">
+                            <i class="fas ${trendIcon} mr-1"></i> ${changeText}
+                        </td>
+                    </tr>
+                `;
+            tableBody.innerHTML += row;
+          });
+
+          const topGainer = data.reduce((prev, current) => {
+            return prev.change > current.change ? prev : current;
+          });
+
+          if (topGainer) {
+            document.getElementById("gainer-name").innerText =
+              topGainer.commodity;
+            const statEl = document.getElementById("gainer-stat");
+            const iconBg = document.getElementById("gainer-icon-bg");
+            const icon = document.getElementById("gainer-icon");
+
+            if (topGainer.change > 0) {
+              statEl.innerHTML = `<span class="text-green-600 font-bold">+${topGainer.change}%</span> in ${topGainer.state}`;
+              iconBg.className =
+                "w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600";
+              icon.className = "fas fa-arrow-up";
+            } else if (topGainer.change < 0) {
+              statEl.innerHTML = `<span class="text-red-500 font-bold">${topGainer.change}%</span> in ${topGainer.state}`;
+              iconBg.className =
+                "w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600";
+              icon.className = "fas fa-arrow-down";
+            } else {
+              statEl.innerText = `Stable in ${topGainer.state}`;
+            }
+          }
+        })
+        .catch((error) => console.error("Error fetching market data:", error));
+    }
+  </script>
+  {% endblock %}
+</div>

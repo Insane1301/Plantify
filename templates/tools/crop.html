@@ -1,0 +1,550 @@
+{% extends 'base.html' %} {% block title %}Plantify - Crop Recommender{%
+endblock %} {% block body %}
+<div class="max-w-5xl mx-auto space-y-8">
+  <div class="text-center md:text-left">
+    <h1 class="text-3xl font-bold text-gray-900">Smart Crop Recommender</h1>
+    <p class="text-gray-500 mt-2">
+      Enter soil and environmental details to find the most suitable crop for
+      your land.
+    </p>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div
+      class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8"
+    >
+      {% if error %}
+      <div
+        class="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center gap-2"
+      >
+        <i class="fas fa-exclamation-circle"></i>
+        <p>{{ error }}</p>
+      </div>
+      {% endif %}
+
+      <form
+        action="{{ url_for('crop_recommendation') }}"
+        method="POST"
+        class="space-y-6"
+      >
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+              <i class="fas fa-flask text-green-600"></i> Soil Nutrients
+            </h3>
+            <div class="group relative">
+              <button
+                type="button"
+                class="text-xs text-green-600 font-medium hover:text-green-700 flex items-center gap-1 bg-green-50 px-3 py-1.5 rounded-full transition-colors"
+              >
+                <i class="fas fa-info-circle"></i> Where to get values?
+              </button>
+              <div
+                class="invisible group-hover:visible absolute right-0 top-full pt-2 w-72 z-50 transition-all"
+              >
+                <div
+                  class="p-4 bg-white border border-gray-100 rounded-xl shadow-2xl text-xs text-gray-600 font-normal leading-relaxed animate-fade-in"
+                >
+                  <div class="flex gap-3">
+                    <div
+                      class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0"
+                    >
+                      <i class="fas fa-microscope text-green-600"></i>
+                    </div>
+                    <div>
+                      <p class="font-bold text-gray-800 mb-1">
+                        Soil Testing Guide
+                      </p>
+                      <p>
+                        Collect soil samples from your field and visit your
+                        local
+                        <span class="font-semibold text-green-600"
+                          >Agricultural Center</span
+                        >
+                        or check your
+                        <span class="font-semibold text-green-600"
+                          >Soil Health Card</span
+                        >
+                        for NPK readings.
+                      </p>
+                    </div>
+                  </div>
+                  <div
+                    class="mt-3 pt-3 border-t border-gray-50 flex items-center justify-between text-[10px] text-gray-400"
+                  >
+                    <span>Lab Testing is recommended</span>
+                    <i class="fas fa-external-link-alt"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label
+                class="flex items-center gap-1 text-sm font-semibold text-gray-600 mb-2"
+                >Nitrogen (N)
+                <i
+                  class="fas fa-question-circle text-gray-300 text-[10px] cursor-help"
+                  title="Available in Soil Health Card or Lab Report"
+                ></i
+              ></label>
+              <input
+                type="number"
+                name="nitrogen"
+                required
+                placeholder="0-140"
+                min="0"
+                max="140"
+                step="0.1"
+                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition"
+              />
+            </div>
+            <div>
+              <label
+                class="flex items-center gap-1 text-sm font-semibold text-gray-600 mb-2"
+                >Phosphorus (P)
+                <i
+                  class="fas fa-question-circle text-gray-300 text-[10px] cursor-help"
+                  title="Available in Soil Health Card or Lab Report"
+                ></i
+              ></label>
+              <input
+                type="number"
+                name="phosphorus"
+                required
+                placeholder="0-145"
+                min="0"
+                max="145"
+                step="0.1"
+                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition"
+              />
+            </div>
+            <div>
+              <label
+                class="flex items-center gap-1 text-sm font-semibold text-gray-600 mb-2"
+                >Potassium (K)
+                <i
+                  class="fas fa-question-circle text-gray-300 text-[10px] cursor-help"
+                  title="Available in Soil Health Card or Lab Report"
+                ></i
+              ></label>
+              <input
+                type="number"
+                name="potassium"
+                required
+                placeholder="0-205"
+                min="0"
+                max="205"
+                step="0.1"
+                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition"
+              />
+            </div>
+          </div>
+        </div>
+
+        <hr class="border-gray-100" />
+
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+              <i class="fas fa-cloud-sun-rain text-blue-600"></i> Environment
+              Factors
+            </h3>
+            <button
+              type="button"
+              id="autofill-weather"
+              class="text-xs text-blue-600 font-medium hover:text-blue-700 flex items-center gap-1 bg-blue-50 px-3 py-1.5 rounded-full transition-colors"
+            >
+              <i class="fas fa-location-arrow"></i> Auto-fill with Local Weather
+            </button>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-semibold text-gray-600 mb-2"
+                >Temperature (°C)</label
+              >
+              <input
+                type="number"
+                name="temperature"
+                required
+                placeholder="e.g. 25"
+                min="0"
+                max="60"
+                step="0.1"
+                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-600 mb-2"
+                >Humidity (%)</label
+              >
+              <input
+                type="number"
+                name="humidity"
+                required
+                placeholder="0-100"
+                min="0"
+                max="100"
+                step="any"
+                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-600 mb-2"
+                >pH Level
+                <i
+                  class="fas fa-question-circle text-gray-300 text-[10px] cursor-help"
+                  title="May be inaccurate. Expert verification recommended."
+                ></i
+              ></label>
+              <input
+                type="number"
+                name="ph"
+                required
+                placeholder="0-14"
+                min="0"
+                max="14"
+                step="any"
+                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-600 mb-2"
+                >Rainfall (mm)</label
+              >
+              <input
+                type="number"
+                name="rainfall"
+                required
+                placeholder="0-1800"
+                min="0"
+                step="any"
+                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition"
+              />
+            </div>
+          </div>
+        </div>
+
+        <hr class="border-gray-100" />
+
+        <div>
+          <h3
+            class="text-lg font-bold text-gray-800 flex items-center gap-2 mb-4"
+          >
+            <i class="fas fa-tractor text-orange-600"></i> Farm Planning
+          </h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-sm font-semibold text-gray-600 mb-2"
+                >Total Land Area (Acres)</label
+              >
+              <input
+                type="number"
+                name="land_area"
+                id="land_area"
+                placeholder="e.g. 5"
+                min="0.1"
+                step="any"
+                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-600 mb-2"
+                >Fallow/Barren (%)</label
+              >
+              <input
+                type="number"
+                name="fallow_percent"
+                id="fallow_percent"
+                placeholder="0-100"
+                min="0"
+                step="any"
+                max="100"
+                value="0"
+                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition"
+              />
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-gray-600 mb-2"
+                >Duration (Months)</label
+              >
+              <input
+                type="number"
+                name="duration"
+                placeholder="e.g. 4"
+                min="1"
+                max="12"
+                class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 focus:bg-white outline-none transition"
+              />
+            </div>
+          </div>
+
+          <div
+            class="mt-4 bg-gray-50 rounded-lg p-3 border border-gray-100 hidden"
+            id="land-usage-viz"
+          >
+            <div
+              class="flex justify-between text-xs font-semibold text-gray-500 mb-1"
+            >
+              <span
+                >Cultivable:
+                <span id="cultivable-val" class="text-green-600">0</span>
+                acres</span
+              >
+              <span
+                >Barren:
+                <span id="barren-val" class="text-orange-500">0</span>
+                acres</span
+              >
+            </div>
+            <div
+              class="w-full h-2 bg-gray-200 rounded-full overflow-hidden flex"
+            >
+              <div
+                id="cultivable-bar"
+                class="h-full bg-green-500 transition-all duration-500"
+                style="width: 100%"
+              ></div>
+              <div
+                id="barren-bar"
+                class="h-full bg-orange-400 transition-all duration-500"
+                style="width: 0%"
+              ></div>
+            </div>
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          class="w-full bg-green-600 text-white font-bold py-4 rounded-xl hover:bg-green-700 transition shadow-lg shadow-green-200 flex justify-center items-center gap-2"
+        >
+          <span>Predict Best Crop</span>
+          <i class="fas fa-seedling"></i>
+        </button>
+
+        <p
+          class="text-center text-[11px] text-gray-400 flex items-center justify-center gap-1.5 px-4"
+        >
+          <i class="fas fa-robot text-[10px]"></i>
+          <span>
+            <b>Disclaimer:</b> Predictions are generated by an AI model based on
+            historical data. Soil conditions can vary; accuracy is not 100%
+            guaranteed.
+          </span>
+        </p>
+      </form>
+    </div>
+
+    <div class="lg:col-span-1 space-y-6">
+      {% if result %}
+      <div
+        class="bg-gradient-to-br from-green-600 to-emerald-700 rounded-2xl shadow-xl p-8 text-white relative overflow-hidden animate-fade-in"
+      >
+        <div
+          class="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-white opacity-10 rounded-full blur-xl"
+        ></div>
+
+        <h3
+          class="text-green-100 font-medium uppercase tracking-wide text-sm mb-2"
+        >
+          Top Recommendation
+        </h3>
+        <div class="text-4xl font-bold mb-4 capitalize">{{ result }}</div>
+
+        <div
+          class="bg-white/20 backdrop-blur-md rounded-lg p-4 text-sm text-green-50 border border-white/10"
+        >
+          <p class="mb-2">
+            Based on the analysis of 7 environmental parameters,
+            <b>{{ result }}</b> is the most suitable crop for your conditions.
+          </p>
+          {% if user_input.land_area %}
+          <div class="mt-3 pt-3 border-t border-white/10 text-xs space-y-1">
+            <p>
+              <i class="fas fa-ruler-combined"></i>
+              For <b>{{ user_input.land_area }} acres</b>
+              {% if user_input.fallow_percent and user_input.fallow_percent !=
+              '0' %} (keeping {{ user_input.fallow_percent }}% barren) {% endif
+              %}
+            </p>
+            {% if user_input.duration %}
+            <p>
+              <i class="fas fa-clock"></i> Planned Duration:
+              <b>{{ user_input.duration }} months</b>
+            </p>
+            {% endif %}
+          </div>
+          {% endif %}
+          <div
+            class="pt-2 border-t border-white/10 text-[10px] flex items-center gap-1.5 opacity-80"
+          >
+            <span>Model-generated result. Accuracy may vary.</span>
+          </div>
+        </div>
+
+        {% if strategy %}
+        <div class="mt-4 p-4 bg-black/10 rounded-xl border border-white/10">
+          <h4
+            class="text-green-200 font-bold text-xs uppercase mb-3 flex items-center gap-2"
+          >
+            <i class="fas fa-brain"></i> AI Sustainability Strategy
+          </h4>
+
+          {% if metrics %}
+          <div class="grid grid-cols-2 gap-3">
+            <div class="bg-white/5 p-2.5 rounded-lg border border-white/5">
+              <p class="text-[10px] text-green-300 uppercase font-bold">
+                Est. N-Recovery
+              </p>
+              <p class="text-lg font-bold text-white">
+                +{{ metrics.n_boost }}
+                <span class="text-[10px] font-normal opacity-60">units</span>
+              </p>
+            </div>
+            <div class="bg-white/5 p-2.5 rounded-lg border border-white/5">
+              <p class="text-[10px] text-blue-300 uppercase font-bold">
+                Sustainability Index
+              </p>
+              <p class="text-lg font-bold text-white">
+                {{ metrics.recovery_rate }}
+                <span class="text-[10px] font-normal opacity-60">pts</span>
+              </p>
+            </div>
+          </div>
+          {% endif %}
+
+          <div
+            class="text-sm text-green-50 leading-relaxed whitespace-pre-line border-t border-white/5"
+          >
+            {{ strategy }}
+          </div>
+        </div>
+        {% endif %}
+
+        <a
+          href="/market"
+          class="mt-6 inline-block w-full text-center bg-white text-green-700 font-bold py-3 rounded-lg hover:bg-gray-100 transition shadow"
+        >
+          Check {{ result }} Prices <i class="fas fa-chart-line ml-1"></i>
+        </a>
+      </div>
+      {% else %}
+      <div
+        class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center text-gray-500"
+      >
+        <div
+          class="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4 text-green-400"
+        >
+          <i class="fas fa-leaf text-2xl"></i>
+        </div>
+        <h3 class="font-bold text-gray-800 mb-2">AI Analysis</h3>
+        <p class="text-sm">
+          Fill in the details to see which crop yields the best profit for your
+          land.
+        </p>
+      </div>
+      {% endif %}
+
+      <div class="bg-yellow-50 rounded-2xl border border-yellow-100 p-6">
+        <h4 class="font-bold text-yellow-800 mb-3 flex items-center gap-2">
+          <i class="fas fa-lightbulb"></i> Did You Know?
+        </h4>
+        <ul class="text-sm text-yellow-700 space-y-2 list-disc list-inside">
+          <li>Accurate pH levels significantly affect nutrient absorption.</li>
+          <li>Nitrogen is crucial for leaf growth.</li>
+          <li>Rotate crops to maintain soil health.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block scripts %} {{ super() }}
+<script>
+  document.getElementById("autofill-weather")?.addEventListener("click", () => {
+    const btn = document.getElementById("autofill-weather");
+    const originalContent = btn.innerHTML;
+
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser");
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner animate-spin"></i> Fetching...';
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const response = await fetch("/api/get-weather", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              lat: position.coords.latitude,
+              lon: position.coords.longitude,
+            }),
+          });
+
+          const data = await response.json();
+          if (data.error) throw new Error(data.error);
+
+          document.getElementsByName("temperature")[0].value =
+            data.annual_temp ?? "";
+          document.getElementsByName("humidity")[0].value =
+            data.annual_humidity ?? "";
+          document.getElementsByName("rainfall")[0].value =
+            data.annual_rainfall ?? "";
+          document.getElementsByName("ph")[0].value = data.ph ?? "";
+
+          btn.innerHTML = '<i class="fas fa-check"></i> Done!';
+          setTimeout(() => {
+            btn.innerHTML = originalContent;
+            btn.disabled = false;
+          }, 2000);
+        } catch (error) {
+          console.error(error);
+          alert("Failed to fetch weather data");
+          btn.innerHTML = originalContent;
+          btn.disabled = false;
+        }
+      },
+      (error) => {
+        console.error(error);
+        alert("Please allow location access to use this feature");
+        btn.innerHTML = originalContent;
+        btn.disabled = false;
+      },
+    );
+  });
+
+  const landAreaInput = document.getElementById("land_area");
+  const fallowInput = document.getElementById("fallow_percent");
+  const viz = document.getElementById("land-usage-viz");
+  const cultVal = document.getElementById("cultivable-val");
+  const barVal = document.getElementById("barren-val");
+  const cultBar = document.getElementById("cultivable-bar");
+  const barBar = document.getElementById("barren-bar");
+
+  function updateLandViz() {
+    const total = parseFloat(landAreaInput.value) || 0;
+    const fallowPct = parseFloat(fallowInput.value) || 0;
+
+    if (total > 0) {
+      viz.classList.remove("hidden");
+      const barren = (total * fallowPct) / 100;
+      const cultivable = total - barren;
+
+      cultVal.textContent = cultivable.toFixed(1);
+      barVal.textContent = barren.toFixed(1);
+
+      cultBar.style.width = 100 - fallowPct + "%";
+      barBar.style.width = fallowPct + "%";
+    } else {
+      viz.classList.add("hidden");
+    }
+  }
+
+  landAreaInput?.addEventListener("input", updateLandViz);
+  fallowInput?.addEventListener("input", updateLandViz);
+</script>
+{% endblock %}

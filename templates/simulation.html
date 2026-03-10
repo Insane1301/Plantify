@@ -1,0 +1,648 @@
+{% extends 'base.html' %} {% block title %}Plantify - Simulation Hub{% endblock
+%} {% block body %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="text-center max-w-3xl mx-auto mb-12">
+    <h1
+      class="text-3xl md:text-4xl font-bold text-gray-900 mb-3 tracking-tight"
+    >
+      Farm Simulation Engine
+    </h1>
+    <p class="text-lg text-gray-600 leading-relaxed">
+      Run "What-If" scenarios to test your farm's resilience against weather,
+      pests, and market crashes.
+    </p>
+  </div>
+
+  <div class="grid lg:grid-cols-12 gap-8 items-start">
+    <div class="lg:col-span-7 space-y-6">
+      <form
+        id="simForm"
+        class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden"
+      >
+        <div class="p-6 md:p-8 border-b border-gray-100 space-y-6">
+          <div class="flex items-center gap-3 mb-2">
+            <div
+              class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-sm"
+            >
+              1
+            </div>
+            <h3 class="text-lg font-bold text-gray-800">Farm Profile</h3>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >Region / Soil Type</label
+            >
+            <div class="relative">
+              <i
+                class="fas fa-map-marker-alt absolute left-4 top-3.5 text-gray-400"
+              ></i>
+              <input
+                type="text"
+                id="regionInput"
+                list="regionList"
+                class="w-full bg-gray-50 border border-gray-200 text-gray-900 rounded-xl pl-11 pr-4 py-3 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition"
+                placeholder="e.g. Punjab, Black Soil, Nashik District"
+                required
+              />
+              <datalist id="regionList"></datalist>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-bold text-gray-700 mb-4">
+              Target Crop
+            </label>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <label class="cursor-pointer group relative">
+                <input
+                  type="radio"
+                  name="crop"
+                  value="Wheat"
+                  class="peer hidden"
+                />
+                <div
+                  class="h-16 bg-white border-2 border-gray-200 rounded-xl flex items-center justify-center transition-all duration-200 hover:border-amber-300 peer-checked:border-amber-500 peer-checked:bg-amber-50 peer-checked:shadow-sm"
+                >
+                  <span
+                    class="text-lg font-bold text-gray-600 group-hover:text-amber-600 peer-checked:text-amber-800"
+                  >
+                    Wheat
+                  </span>
+                  <div
+                    class="absolute top-2 right-2 w-2 h-2 rounded-full bg-amber-500 opacity-0 peer-checked:opacity-100 transition-opacity"
+                  ></div>
+                </div>
+              </label>
+
+              <label class="cursor-pointer group relative">
+                <input
+                  type="radio"
+                  name="crop"
+                  value="Rice"
+                  class="peer hidden"
+                />
+                <div
+                  class="h-16 bg-white border-2 border-gray-200 rounded-xl flex items-center justify-center transition-all duration-200 hover:border-emerald-300 peer-checked:border-emerald-500 peer-checked:bg-emerald-50 peer-checked:shadow-sm"
+                >
+                  <span
+                    class="text-lg font-bold text-gray-600 group-hover:text-emerald-600 peer-checked:text-emerald-800"
+                  >
+                    Rice
+                  </span>
+                  <div
+                    class="absolute top-2 right-2 w-2 h-2 rounded-full bg-emerald-500 opacity-0 peer-checked:opacity-100 transition-opacity"
+                  ></div>
+                </div>
+              </label>
+
+              <label class="cursor-pointer group relative">
+                <input
+                  type="radio"
+                  name="crop"
+                  value="Cotton"
+                  class="peer hidden"
+                />
+                <div
+                  class="h-16 bg-white border-2 border-gray-200 rounded-xl flex items-center justify-center transition-all duration-200 hover:border-blue-300 peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:shadow-sm"
+                >
+                  <span
+                    class="text-lg font-bold text-gray-600 group-hover:text-blue-600 peer-checked:text-blue-800"
+                  >
+                    Cotton
+                  </span>
+                  <div
+                    class="absolute top-2 right-2 w-2 h-2 rounded-full bg-blue-500 opacity-0 peer-checked:opacity-100 transition-opacity"
+                  ></div>
+                </div>
+              </label>
+
+              <label class="cursor-pointer group relative">
+                <input
+                  type="radio"
+                  name="crop"
+                  id="customRadio"
+                  value=""
+                  class="peer hidden"
+                />
+                <div
+                  class="h-16 bg-white border-2 border-gray-200 rounded-xl flex items-center justify-center transition-all duration-200 hover:border-purple-300 peer-checked:border-purple-500 peer-checked:bg-purple-50 peer-checked:shadow-sm px-4"
+                >
+                  <input
+                    type="text"
+                    id="customCropInput"
+                    placeholder="Other Crop..."
+                    class="w-full text-center bg-transparent text-gray-700 font-bold placeholder-gray-400 focus:outline-none text-base group-hover:placeholder-purple-400 peer-checked:text-purple-800"
+                    onclick="
+                      document.getElementById('customRadio').checked = true
+                    "
+                    oninput="
+                      document.getElementById('customRadio').checked = true
+                    "
+                  />
+
+                  <div
+                    class="absolute top-2 right-2 w-2 h-2 rounded-full bg-purple-500 opacity-0 peer-checked:opacity-100 transition-opacity"
+                  ></div>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-6 md:p-8 bg-gray-50/50 space-y-6">
+          <div class="flex items-center gap-3 mb-2">
+            <div
+              class="w-8 h-8 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold text-sm"
+            >
+              2
+            </div>
+            <h3 class="text-lg font-bold text-gray-800">Simulation Scenario</h3>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >Catastrophic Event</label
+            >
+            <div class="relative">
+              <select
+                id="scenarioSelect"
+                class="w-full bg-white border border-gray-300 text-gray-900 text-base rounded-xl pl-4 pr-10 py-3 focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none appearance-none cursor-pointer"
+              >
+                <option value="" disabled selected>
+                  Choose an event to simulate...
+                </option>
+              </select>
+              <div
+                class="absolute right-4 top-4 pointer-events-none text-gray-500"
+              ></div>
+            </div>
+          </div>
+
+          <div class="grid sm:grid-cols-2 gap-6 pt-2">
+            <div>
+              <div class="flex justify-between items-end mb-2">
+                <label
+                  class="text-xs font-bold text-gray-500 uppercase tracking-wider"
+                  >Impact Severity</label
+                >
+                <span
+                  id="severityVal"
+                  class="text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded"
+                  >Moderate</span
+                >
+              </div>
+              <input
+                type="range"
+                id="severityRange"
+                min="1"
+                max="100"
+                value="50"
+                class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-red-500"
+              />
+              <div class="flex justify-between text-[10px] text-gray-400 mt-1">
+                <span>Mild</span>
+                <span>Catastrophic</span>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex justify-between items-end mb-2">
+                <label
+                  class="text-xs font-bold text-gray-500 uppercase tracking-wider"
+                  >Financial Buffer</label
+                >
+                <span
+                  id="resilienceVal"
+                  class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded"
+                  >Average</span
+                >
+              </div>
+              <input
+                type="range"
+                id="resilienceRange"
+                min="1"
+                max="100"
+                value="50"
+                class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
+              />
+              <div class="flex justify-between text-[10px] text-gray-400 mt-1">
+                <span>In Debt</span>
+                <span>Strong</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-6 border-t border-gray-200 bg-white">
+          <button
+            type="submit"
+            id="generateBtn"
+            class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-xl text-lg shadow-lg shadow-green-200 transition-all transform hover:scale-[1.01] flex items-center justify-center gap-2"
+          >
+            <span>Run Simulation</span>
+            <i class="fas fa-play text-sm"></i>
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <div class="lg:col-span-5">
+      <div
+        id="loader"
+        class="hidden h-full min-h-[400px] flex flex-col items-center justify-center bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center"
+      >
+        <div class="relative">
+          <div
+            class="w-16 h-16 border-4 border-green-100 border-t-green-500 rounded-full animate-spin"
+          ></div>
+          <div class="absolute inset-0 flex items-center justify-center">
+            <i class="fas fa-brain text-green-500"></i>
+          </div>
+        </div>
+        <h3 class="text-lg font-bold text-gray-800 mt-6">
+          Analyzing Scenario...
+        </h3>
+        <p class="text-gray-500 text-sm mt-2 max-w-xs">
+          Calculating impact based on soil type, crop resilience, and financial
+          constraints.
+        </p>
+      </div>
+
+      <div
+        id="emptyState"
+        class="h-full min-h-[400px] flex flex-col items-center justify-center bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200 p-8 text-center"
+      >
+        <div
+          class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4 text-gray-400"
+        >
+          <i class="fas fa-chart-line text-2xl"></i>
+        </div>
+        <h4 class="text-gray-900 font-bold mb-1">No Simulation Results</h4>
+        <p class="text-gray-500 text-sm">
+          Fill out the form on the left to generate a survival strategy.
+        </p>
+      </div>
+
+      <div
+        id="outputArea"
+        class="hidden bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden animate-fade-in-up"
+      >
+        <div class="bg-green-600 px-6 py-4 flex justify-between items-center">
+          <h3 class="text-white font-bold flex items-center gap-2">
+            <i class="fas fa-file-medical-alt"></i> Strategy Report
+          </h3>
+          <button
+            onclick="printReport()"
+            class="text-green-100 hover:text-white text-sm hover:underline"
+          >
+            <i class="fas fa-print mr-1"></i> Save
+          </button>
+        </div>
+
+        <div class="p-6 md:p-8 max-h-[80vh] overflow-y-auto custom-scrollbar">
+          <div
+            id="resultText"
+            class="prose prose-sm md:prose-base prose-green max-w-none text-gray-700"
+          ></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .animate-fade-in-up {
+    animation: fadeInUp 0.5s ease-out forwards;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f1f1;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 10px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
+  }
+
+  #resultText ul {
+    list-style-type: disc;
+    padding-left: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  #resultText li {
+    margin-bottom: 0.5rem;
+  }
+  #resultText h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #059669;
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+  #resultText h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-top: 1.25rem;
+    margin-bottom: 0.5rem;
+  }
+  #resultText strong {
+    color: #111827;
+  }
+</style>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const regions = [
+      "Punjab",
+      "Haryana",
+      "Uttar Pradesh",
+      "Madhya Pradesh",
+      "Telangana",
+      "Andhra Pradesh",
+      "Maharashtra (Vidarbha)",
+      "Maharashtra (Marathwada)",
+      "Karnataka",
+      "Tamil Nadu",
+      "West Bengal",
+      "Bihar",
+      "Gujarat",
+      "Rajasthan",
+      "Kerala",
+      "Assam",
+      "Black Soil Region",
+      "Red Soil Region",
+      "Coastal Belt",
+      "Himalayan Foothills",
+      "Odisha",
+      "Jharkhand",
+      "Chhattisgarh",
+      "Uttarakhand",
+      "Himachal Pradesh",
+      "Jammu & Kashmir",
+      "Delhi NCR (Peri-urban)",
+      "North-East (Tripura, Manipur, Nagaland)",
+      "Sikkim",
+      "Coastal Karnataka",
+      "Bundelkhand (UP/MP)",
+      "Rayalaseema (Andhra Pradesh)",
+      "Ladakh (Cold Desert)",
+      "Western Ghats Zone",
+      "Indo-Gangetic Plains",
+    ];
+
+    const regionList = document.getElementById("regionList");
+    regions.forEach((r) => {
+      const option = document.createElement("option");
+      option.value = r;
+      regionList.appendChild(option);
+    });
+
+    const scenarioCategories = {
+      "Extreme Weather": [
+        "Unexpected Flash Floods",
+        "Severe Heatwave (> 45°C)",
+        "Delayed Monsoon (45+ Days)",
+        "Unseasonal Hailstorm",
+        "Frost / Cold Wave",
+        "Cyclone Landfall",
+        "Prolonged Drought (60+ days no rain)",
+        "Sudden Temperature Drop during Flowering",
+      ],
+      "Pests & Disease": [
+        "Locust Swarm Attack",
+        "Fall Armyworm Infestation",
+        "Pink Bollworm Resistance",
+        "Sudden Fungal Blight",
+        "Root Rot Epidemic",
+        "Invasive Weed Takeover",
+        "Increased Pest Resistance to Chemicals",
+        "Livestock Disease Outbreak (Zoonotic risk)",
+      ],
+      "Economic & Market": [
+        "Market Price Crash (-60%)",
+        "Fertilizer Shortage",
+        "Labor Strike during Harvest",
+        "Global Export Ban",
+        "Crop Insurance Claim Denied despite Damage",
+        "Sudden MSP Change for Key Crop",
+        "Transport Strike during Harvest Season",
+      ],
+      "Water & Irrigation Crisis": [
+        "Groundwater Depletion (Well dried up)",
+        "Canal Water Supply Stopped",
+        "Salinity Intrusion in Coastal Farms",
+        "Dam Water Release Delayed by 30 days",
+        "Electricity Cut for 7+ days during Irrigation",
+      ],
+      "Soil & Nutrient Issues": [
+        "Soil Salinity Spike (Visible white crust)",
+        "Micronutrient Deficiency (Zinc/Iron)",
+        "Heavy Metal Contamination Suspected",
+        "Soil Erosion (Topsoil washed away)",
+        "Organic Matter Depletion (< 0.5%)",
+      ],
+      "Input & Resource Issues": [
+        "Seeds Failed to Germinate (>40% failure)",
+        "Fake Pesticide Supply (No effect)",
+        "Diesel Shortage for Pumping",
+        "Farm Machinery Breakdown during Peak",
+        "Certified Seed Unavailable for Season",
+      ],
+      "Policy & Regulatory": [
+        "Subsidy Withdrawal on Key Input",
+        "Water Usage Restrictions Imposed",
+        "Ban on Commonly Used Pesticide",
+        "Land Zoning Change Affecting Farming",
+        "New Environmental Compliance Required",
+      ],
+      "Labor & Social": [
+        "Migration of Labor Force before Harvest",
+        "Farmers' Protest Blocking Market Access",
+        "Theft of Harvest from Field/Storage",
+        "Inter-community Conflict affecting Work",
+        "Farmer Health Crisis during Peak Season",
+      ],
+      "Technology & Digital": [
+        "Weather Forecast Inaccuracy (Major deviation)",
+        "Agri-App Failure during Critical Decision",
+        "Precision Farming Tool Malfunction",
+        "Digital Payment System Down during Sale",
+        "Crop Advisory based on Wrong Location Data",
+      ],
+      "Cross-Cutting Scenarios": [
+        "Simultaneous Drought & Market Crash",
+        "Post-Harvest Loss due to Transport Strike",
+        "Cyclone followed by Pest Outbreak",
+        "Heatwave causing Pollination Failure",
+        "Flood leading to Soil Nutrient Leaching",
+      ],
+    };
+
+    const scenarioSelect = document.getElementById("scenarioSelect");
+    for (const [category, events] of Object.entries(scenarioCategories)) {
+      const optgroup = document.createElement("optgroup");
+      optgroup.label = category;
+      events.forEach((event) => {
+        const option = document.createElement("option");
+        option.value = event;
+        option.textContent = event;
+        optgroup.appendChild(option);
+      });
+      scenarioSelect.appendChild(optgroup);
+    }
+
+    const sevRange = document.getElementById("severityRange");
+    const sevVal = document.getElementById("severityVal");
+    sevRange.addEventListener("input", (e) => {
+      const v = e.target.value;
+      if (v < 30) {
+        sevVal.innerText = "Mild";
+        sevVal.className =
+          "text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded";
+      } else if (v < 70) {
+        sevVal.innerText = "Severe";
+        sevVal.className =
+          "text-xs font-bold text-orange-600 bg-orange-50 px-2 py-1 rounded";
+      } else {
+        sevVal.innerText = "Catastrophic";
+        sevVal.className =
+          "text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded";
+      }
+    });
+
+    const resRange = document.getElementById("resilienceRange");
+    const resVal = document.getElementById("resilienceVal");
+    resRange.addEventListener("input", (e) => {
+      const v = e.target.value;
+      if (v < 30) {
+        resVal.innerText = "Low / In Debt";
+        resVal.className =
+          "text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded";
+      } else if (v < 70) {
+        resVal.innerText = "Moderate";
+        resVal.className =
+          "text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded";
+      } else {
+        resVal.innerText = "Strong";
+        resVal.className =
+          "text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded";
+      }
+    });
+
+    const form = document.getElementById("simForm");
+    const generateBtn = document.getElementById("generateBtn");
+    const loader = document.getElementById("loader");
+    const outputArea = document.getElementById("outputArea");
+    const emptyState = document.getElementById("emptyState");
+    const resultText = document.getElementById("resultText");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const region = document.getElementById("regionInput").value;
+      const scenario = document.getElementById("scenarioSelect").value;
+      let crop = document.querySelector('input[name="crop"]:checked')?.value;
+      const customCropVal = document.getElementById("customCropInput").value;
+      if (!crop && customCropVal) crop = customCropVal;
+
+      const severity = sevRange.value;
+      const resilience = resRange.value;
+
+      if (!region || !crop || !scenario) {
+        alert("Please fill in all required fields.");
+        return;
+      }
+
+      generateBtn.disabled = true;
+      generateBtn.innerHTML = `<i class="fas fa-circle-notch animate-spin"></i> Processing...`;
+
+      emptyState.classList.add("hidden");
+      outputArea.classList.add("hidden");
+      loader.classList.remove("hidden");
+
+      try {
+        const response = await fetch("/api/simulate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            region,
+            crop,
+            scenario,
+            severity,
+            resilience,
+          }),
+        });
+
+        const data = await response.json();
+
+        loader.classList.add("hidden");
+
+        if (data.success) {
+          let cleanHtml = data.result;
+
+          cleanHtml = cleanHtml.replace(/```html/g, "").replace(/```/g, "");
+
+          cleanHtml = cleanHtml
+            .replace(/<!DOCTYPE html>/gi, "")
+            .replace(/<html>/gi, "")
+            .replace(/<\/html>/gi, "")
+            .replace(/<head>[\s\S]*?<\/head>/gi, "")
+            .replace(/<body>/gi, "")
+            .replace(/<\/body>/gi, "");
+
+          cleanHtml = cleanHtml.replace(
+            /\*\*(.*?)\*\*/g,
+            "<strong>$1</strong>",
+          );
+
+          resultText.innerHTML = cleanHtml;
+          outputArea.classList.remove("hidden");
+          outputArea.scrollIntoView({ behavior: "smooth" });
+        } else {
+          resultText.innerHTML = `
+                    <div class="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg">
+                        <p class="font-bold">Simulation Error</p>
+                        <p>${data.error}</p>
+                    </div>`;
+          outputArea.classList.remove("hidden");
+        }
+      } catch (error) {
+        console.error(error);
+        loader.classList.add("hidden");
+        outputArea.classList.remove("hidden");
+        resultText.innerHTML = `<p class="text-red-500">Connection failed. Ensure the AI server is running.</p>`;
+      } finally {
+        generateBtn.disabled = false;
+        generateBtn.innerHTML = `<span>Run Simulation</span> <i class="fas fa-play text-sm"></i>`;
+      }
+    });
+  });
+
+  function printReport() {
+    const printContent = document.getElementById("resultText").innerHTML;
+    const originalContent = document.body.innerHTML;
+    document.body.innerHTML = `<div style="padding:40px;"><h1>Farm Strategy Report</h1>${printContent}</div>`;
+    window.print();
+    document.body.innerHTML = originalContent;
+    location.reload();
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,458 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}Plantify App{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/styles.css') }}"
+    />
+    <script src="{{ url_for('static', filename='js/translate.js') }}"></script>
+  </head>
+
+  <body class="bg-gray-50 text-gray-800">
+    <div
+      id="google_translate_element"
+      style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: -999;
+        visibility: hidden;
+      "
+    ></div>
+
+    <div class="flex h-screen overflow-hidden relative">
+      <div
+        id="sidebar-overlay"
+        class="fixed inset-0 bg-black bg-opacity-50 z-20 hidden md:hidden"
+      ></div>
+
+      <aside
+        id="sidebar"
+        class="fixed inset-y-0 left-0 z-30 w-64 bg-white border-r border-gray-200 transform -translate-x-full md:relative md:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col"
+      >
+        <div
+          class="flex items-center justify-between px-6 h-16 border-b border-gray-200"
+        >
+          <div class="flex items-center gap-2">
+            <i class="fas fa-leaf text-green-600 text-2xl"></i>
+            <span class="text-2xl font-bold text-gray-800">Plantify</span>
+          </div>
+          <button id="close-sidebar" class="md:hidden text-gray-500">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto no-scrollbar py-4">
+          <nav class="px-4 space-y-2">
+            <p
+              class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2"
+            >
+              Main
+            </p>
+            <a
+              href="/dashboard"
+              class="flex items-center gap-3 px-4 py-3 text-gray-600 rounded-lg font-medium"
+            >
+              <i class="fas fa-th-large w-5"></i> Dashboard
+            </a>
+            <a
+              href="/diagnose"
+              class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg font-medium transition"
+            >
+              <i class="fas fa-camera w-5"></i> Disease Detector
+            </a>
+            <a
+              href="/market"
+              class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg font-medium transition"
+            >
+              <i class="fas fa-chart-line w-5"></i> Market Trends
+            </a>
+
+            <p
+              class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mt-6 mb-2"
+            >
+              Tools
+            </p>
+            <a
+              href="/tools/crop"
+              class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg font-medium transition"
+            >
+              <i class="fas fa-seedling w-5"></i> Crop Recommender
+            </a>
+            <a
+              href="/tools/yield"
+              class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg font-medium transition"
+            >
+              <i class="fas fa-balance-scale w-5"></i> Yield Predictor
+            </a>
+            <a
+              href="/tools/fertilizer"
+              class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg font-medium transition"
+            >
+              <i class="fas fa-flask w-5"></i> Fertilizer Calc
+            </a>
+            <a
+              href="/schemes"
+              class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg font-medium transition"
+            >
+              <i class="fas fa-landmark w-5"></i> Gov Schemes
+            </a>
+            <a
+              href="/simulation"
+              class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg font-medium transition"
+            >
+              <i class="fas fa-dice w-5"></i> Scenario Simulation
+            </a>
+
+            <p
+              class="px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mt-6 mb-2"
+            >
+              Shop
+            </p>
+            <a
+              href="/supplements"
+              class="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg font-medium transition"
+            >
+              <i class="fas fa-shopping-bag w-5"></i> Supplements
+            </a>
+          </nav>
+        </div>
+        <div class="p-4 border-t border-gray-200">
+          <a
+            href="#"
+            class="flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg font-medium transition"
+          >
+            <i class="fas fa-sign-out-alt w-5"></i> Logout
+          </a>
+        </div>
+      </aside>
+
+      <div class="flex-1 flex flex-col overflow-hidden">
+        <header
+          class="flex items-center justify-between h-16 bg-white border-b border-gray-200 px-6"
+        >
+          <button id="open-sidebar" class="md:hidden text-gray-500 text-xl">
+            <i class="fas fa-bars"></i>
+          </button>
+
+          <div class="hidden md:flex relative w-96">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3"
+              ><i class="fas fa-search text-gray-400"></i
+            ></span>
+            <input
+              id="global-search-input"
+              type="text"
+              class="w-full py-2 pl-10 pr-12 text-gray-700 bg-gray-50 border border-gray-200 rounded-full focus:outline-none focus:border-green-500"
+              placeholder="Search..."
+            />
+            <button
+              id="voice-search-btn"
+              class="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 hover:text-green-600 transition-colors"
+              title="Voice Search"
+            >
+              <i class="fas fa-microphone"></i>
+            </button>
+          </div>
+
+          <div class="flex items-center gap-5">
+            <div class="relative group" id="base-lang-selector">
+              <button
+                id="base-lang-button"
+                class="flex items-center text-gray-600 hover:text-green-600 transition-colors py-2"
+              >
+                <i class="fas fa-globe mr-2"></i>
+                <span id="current_lang">English</span>
+                <i class="fas fa-chevron-down ml-1 text-xs"></i>
+              </button>
+
+              <div
+                id="base-lang-dropdown"
+                class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-xl z-50 border border-gray-100"
+              >
+                <div
+                  class="py-1 max-h-60 overflow-y-auto"
+                  id="base-lang-list"
+                ></div>
+              </div>
+            </div>
+
+            <button
+              class="relative p-2 text-gray-400 hover:text-gray-600 transition"
+            >
+              <i class="fas fa-bell text-xl"></i>
+              <span
+                class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border-2 border-white"
+              ></span>
+            </button>
+
+            <div
+              class="relative pl-4 border-l border-gray-200 ml-2 h-16 flex items-center"
+              id="user-menu-dropdown"
+            >
+              <button
+                id="user-menu-button"
+                class="flex items-center gap-3 focus:outline-none h-full"
+              >
+                <div class="text-right hidden sm:block">
+                  <p class="text-sm font-semibold text-gray-800 leading-none">
+                    {{ session.get('user_name', 'Farmer') }}
+                  </p>
+                </div>
+
+                <div
+                  class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-700 font-bold border-2 border-green-200 group-hover:border-green-500 transition"
+                >
+                  {{ session.get('user_name', 'U')[0] | upper }}
+                </div>
+
+                <i
+                  class="fas fa-chevron-down text-xs text-gray-400 group-hover:text-green-600 transition ml-1 duration-200"
+                ></i>
+              </button>
+
+              <div
+                id="user-menu-panel"
+                class="absolute right-0 top-full pt-4 w-60 invisible opacity-0 transition-all duration-200 ease-in-out z-50"
+              >
+                <div
+                  class="bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden transform translate-y-2 transition-transform duration-200"
+                >
+                  <div class="px-5 py-4 border-b border-gray-50 bg-gray-50/50">
+                    <p
+                      class="text-xs text-gray-400 uppercase tracking-wider font-bold mb-1"
+                    >
+                      Signed in as
+                    </p>
+                    <p
+                      class="text-sm font-medium text-gray-900 truncate"
+                      title="{{ session.get('phone', '') }}"
+                    >
+                      {{ session.get('phone', '1234567890') }}
+                    </p>
+                  </div>
+
+                  <div class="py-2">
+                    <a
+                      href="/profile"
+                      class="flex items-center px-5 py-2.5 text-sm text-gray-600 hover:bg-green-50 hover:text-green-700 transition"
+                    >
+                      <i class="fas fa-user-circle w-5 mr-3 text-gray-400"></i>
+                      My Profile
+                    </a>
+                  </div>
+
+                  <div class="py-2 border-t border-gray-100 bg-gray-50/30">
+                    <a
+                      href="/#"
+                      class="flex items-center px-5 py-2.5 text-sm text-red-600 hover:bg-red-50 transition font-medium"
+                    >
+                      <i class="fas fa-sign-out-alt w-5 mr-3"></i> Log Out
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </header>
+        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6">
+          {% block body %}{% endblock %}
+        </main>
+        {% block footer %}{% endblock %}
+      </div>
+    </div>
+    {% block scripts %}
+    <script>
+      const sidebar = document.getElementById("sidebar");
+      const overlay = document.getElementById("sidebar-overlay");
+      const toggle = () => {
+        sidebar.classList.toggle("-translate-x-full");
+        overlay.classList.toggle("hidden");
+      };
+      document.getElementById("open-sidebar").addEventListener("click", toggle);
+      document
+        .getElementById("close-sidebar")
+        .addEventListener("click", toggle);
+      overlay.addEventListener("click", toggle);
+
+      document.addEventListener("DOMContentLoaded", () => {
+        setupUserMenu();
+        const currentPath = window.location.pathname;
+
+        document.querySelectorAll("#sidebar nav a").forEach((link) => {
+          const linkPath = link.getAttribute("href");
+
+          if (linkPath === currentPath) {
+            link.classList.add("bg-green-50", "text-green-700");
+          } else {
+            link.classList.remove("bg-green-50", "text-green-700");
+          }
+        });
+      });
+
+      const notifButton = document.querySelector(
+        "button i.fas.fa-bell",
+      )?.parentElement;
+      const NOTIF_KEY = "notif_permission";
+
+      if (notifButton) {
+        notifButton.addEventListener("click", async () => {
+          if (localStorage.getItem(NOTIF_KEY)) return;
+
+          if ("Notification" in window) {
+            const permission = await Notification.requestPermission();
+            if (permission === "granted") {
+              new Notification("Notifications enabled!");
+            }
+            localStorage.setItem(NOTIF_KEY, "true");
+          } else {
+            alert("This browser does not support notifications.");
+          }
+        });
+      }
+
+      function setupUserMenu() {
+        const dropdown = document.getElementById("user-menu-dropdown");
+        const button = document.getElementById("user-menu-button");
+
+        if (!dropdown || !button) return;
+
+        button.addEventListener("click", (event) => {
+          event.stopPropagation();
+          dropdown.classList.toggle("user-menu-active");
+        });
+
+        document.addEventListener("click", (event) => {
+          if (!dropdown.contains(event.target)) {
+            dropdown.classList.remove("user-menu-active");
+          }
+        });
+      }
+
+      function setupVoiceSearch() {
+        const searchInput = document.getElementById("global-search-input");
+        const voiceBtn = document.getElementById("voice-search-btn");
+
+        if (!searchInput || !voiceBtn) return;
+
+        const SpeechRecognition =
+          window.SpeechRecognition || window.webkitSpeechRecognition;
+
+        if (!SpeechRecognition) {
+          voiceBtn.style.display = "none";
+          return;
+        }
+
+        const recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = false;
+
+        const currentLang =
+          document.getElementById("current_lang")?.textContent?.trim() ||
+          "English";
+        const langMap = {
+          English: "en-US",
+          Hindi: "hi-IN",
+          Marathi: "mr-IN",
+          Kannada: "kn-IN",
+          Tamil: "ta-IN",
+          Telugu: "te-IN",
+        };
+        recognition.lang = langMap[currentLang] || "en-US";
+
+        let isListening = false;
+
+        voiceBtn.addEventListener("click", () => {
+          if (isListening) {
+            recognition.stop();
+          } else {
+            recognition.start();
+          }
+        });
+
+        recognition.onstart = () => {
+          isListening = true;
+          voiceBtn.classList.add("text-red-500", "animate-pulse");
+          searchInput.placeholder = "Listening...";
+        };
+
+        recognition.onend = () => {
+          isListening = false;
+          voiceBtn.classList.remove("text-red-500", "animate-pulse");
+          searchInput.placeholder = "Search...";
+        };
+
+        recognition.onresult = (event) => {
+          const transcript = event.results[0][0].transcript;
+          searchInput.value = transcript;
+
+          searchInput.classList.add("ring-2", "ring-green-500");
+          setTimeout(
+            () => searchInput.classList.remove("ring-2", "ring-green-500"),
+            1000,
+          );
+
+          handleSearch(transcript);
+        };
+
+        recognition.onerror = (event) => {
+          console.error("Voice search error:", event.error);
+          isListening = false;
+          voiceBtn.classList.remove("text-red-500", "animate-pulse");
+        };
+
+        const handleSearch = (query) => {
+          const val = query.toLowerCase();
+          if (val.includes("crop") || val.includes("recommend"))
+            window.location.href = "/tools/crop";
+          else if (
+            val.includes("market") ||
+            val.includes("price") ||
+            val.includes("trend")
+          )
+            window.location.href = "/market";
+          else if (
+            val.includes("disease") ||
+            val.includes("detector") ||
+            val.includes("camera") ||
+            val.includes("scan")
+          )
+            window.location.href = "/diagnose";
+          else if (val.includes("fertilizer") || val.includes("calc"))
+            window.location.href = "/tools/fertilizer";
+          else if (val.includes("yield") || val.includes("predict"))
+            window.location.href = "/tools/yield";
+          else if (val.includes("scheme") || val.includes("gov"))
+            window.location.href = "/schemes";
+          else if (val.includes("simulate") || val.includes("scenario"))
+            window.location.href = "/simulation";
+          else if (val.includes("supplement") || val.includes("shop"))
+            window.location.href = "/supplements";
+          else if (val.includes("profile") || val.includes("user"))
+            window.location.href = "/profile";
+          else if (val.includes("dash")) window.location.href = "/dashboard";
+        };
+
+        searchInput.addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            handleSearch(searchInput.value);
+          }
+        });
+      }
+
+      setupVoiceSearch();
+    </script>
+    {% endblock %}
+  </body>
+</html>

@@ -1,0 +1,314 @@
+{% extends 'base.html' %} 
+{% block title %}Plantify - Profile{% endblock %} 
+
+{% block body %}
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="mb-6 px-4 py-3 rounded-lg text-white 
+          {% if category == 'success' %} bg-green-500 
+          {% elif category == 'error' %} bg-red-500
+          {% elif category == 'warning' %} bg-yellow-500
+          {% else %} bg-blue-500 {% endif %} flex items-center gap-2 animate-fade-in-down" role="alert">
+          {% if category == 'success' %} <i class="fas fa-check-circle"></i>
+          {% elif category == 'error' %} <i class="fas fa-exclamation-circle"></i>
+          {% elif category == 'warning' %} <i class="fas fa-exclamation-triangle"></i>
+          {% else %} <i class="fas fa-info-circle"></i> {% endif %}
+          <span class="font-medium">{{ message }}</span>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-900">My Profile</h1>
+    <p class="text-gray-500 mt-2">Manage your personal information and farming details.</p>
+  </div>
+
+    <form action="/profile" method="POST" enctype="multipart/form-data" class="space-y-6">
+    
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="bg-gray-50 px-6 py-4 border-b border-gray-100 flex items-center gap-3">
+        <div class="bg-green-100 text-green-600 p-2 rounded-lg">
+          <i class="fas fa-user"></i>
+        </div>
+        <h2 class="text-lg font-bold text-gray-800">Personal Details</h2>
+      </div>
+      
+      <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+          <input type="text" name="first_name" value="{{ user.first_name }}" required
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+          <input type="text" name="last_name" value="{{ user.last_name }}" required
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+          <input type="tel" maxlength="10" pattern="[0-9]{10}" name="phone" value="{{ user.phone }}" required inputmode="numeric"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            New Password <span class="text-gray-400 font-normal">(Leave blank to keep current)</span>
+          </label>
+          <input type="password" name="password" placeholder="••••••••"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition" />
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="bg-gray-50 px-6 py-4 border-b border-gray-100 flex items-center gap-3">
+        <div class="bg-blue-100 text-blue-600 p-2 rounded-lg">
+          <i class="fas fa-id-card"></i>
+        </div>
+        <h2 class="text-lg font-bold text-gray-800">Demographics & Farming</h2>
+      </div>
+
+      <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Age</label>
+          <input type="number" name="age" value="{{ user.age }}" min="18" max="100"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Gender</label>
+          <select name="gender" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none bg-white">
+            <option value="Male" {% if user.gender == 'Male' %}selected{% endif %}>Male</option>
+            <option value="Female" {% if user.gender == 'Female' %}selected{% endif %}>Female</option>
+            <option value="Other" {% if user.gender == 'Other' %}selected{% endif %}>Other</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Caste Category</label>
+          <select name="caste" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none bg-white">
+            <option value="General" {% if user.caste == 'General' %}selected{% endif %}>General</option>
+            <option value="OBC" {% if user.caste == 'OBC' %}selected{% endif %}>OBC</option>
+            <option value="SC" {% if user.caste == 'SC' %}selected{% endif %}>SC</option>
+            <option value="ST" {% if user.caste == 'ST' %}selected{% endif %}>ST</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">State</label>
+          <select name="state" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none bg-white">
+            <option value="andaman_and_nicobar" {% if user.state == 'andaman_and_nicobar' %}selected{% endif %}>Andaman and Nicobar</option>
+            <option value="andhra_pradesh" {% if user.state == 'andhra_pradesh' %}selected{% endif %}>Andhra Pradesh</option>
+            <option value="arunachal_pradesh" {% if user.state == 'arunachal_pradesh' %}selected{% endif %}>Arunachal Pradesh</option>
+            <option value="assam" {% if user.state == 'assam' %}selected{% endif %}>Assam</option>
+            <option value="bihar" {% if user.state == 'bihar' %}selected{% endif %}>Bihar</option>
+            <option value="chandigarh" {% if user.state == 'chandigarh' %}selected{% endif %}>Chandigarh</option>
+            <option value="chhattisgarh" {% if user.state == 'chhattisgarh' %}selected{% endif %}>Chhattisgarh</option>
+            <option value="dadra_and_nagar_haveli" {% if user.state == 'dadra_and_nagar_haveli' %}selected{% endif %}>Dadra and Nagar Haveli</option>
+            <option value="daman_and_diu" {% if user.state == 'daman_and_diu' %}selected{% endif %}>Daman and Diu</option>
+            <option value="goa" {% if user.state == 'goa' %}selected{% endif %}>Goa</option>
+            <option value="gujarat" {% if user.state == 'gujarat' %}selected{% endif %}>Gujarat</option>
+            <option value="haryana" {% if user.state == 'haryana' %}selected{% endif %}>Haryana</option>
+            <option value="himachal_pradesh" {% if user.state == 'himachal_pradesh' %}selected{% endif %}>Himachal Pradesh</option>
+            <option value="jammu_and_kashmir" {% if user.state == 'jammu_and_kashmir' %}selected{% endif %}>Jammu and Kashmir</option>
+            <option value="jharkhand" {% if user.state == 'jharkhand' %}selected{% endif %}>Jharkhand</option>
+            <option value="karnataka" {% if user.state == 'karnataka' %}selected{% endif %}>Karnataka</option>
+            <option value="kerala" {% if user.state == 'kerala' %}selected{% endif %}>Kerala</option>
+            <option value="lakshadweep" {% if user.state == 'lakshadweep' %}selected{% endif %}>Lakshadweep</option>
+            <option value="madhya_pradesh" {% if user.state == 'madhya_pradesh' %}selected{% endif %}>Madhya Pradesh</option>
+            <option value="maharashtra" {% if user.state == 'maharashtra' %}selected{% endif %}>Maharashtra</option>
+            <option value="manipur" {% if user.state == 'manipur' %}selected{% endif %}>Manipur</option>
+            <option value="meghalaya" {% if user.state == 'meghalaya' %}selected{% endif %}>Meghalaya</option>
+            <option value="mizoram" {% if user.state == 'mizoram' %}selected{% endif %}>Mizoram</option>
+            <option value="delhi" {% if user.state == 'delhi' %}selected{% endif %}>NCT of Delhi</option>
+            <option value="nagaland" {% if user.state == 'nagaland' %}selected{% endif %}>Nagaland</option>
+            <option value="odisha" {% if user.state == 'odisha' %}selected{% endif %}>Odisha</option>
+            <option value="puducherry" {% if user.state == 'puducherry' %}selected{% endif %}>Pondicherry / Puducherry</option>
+            <option value="punjab" {% if user.state == 'punjab' %}selected{% endif %}>Punjab</option>
+            <option value="rajasthan" {% if user.state == 'rajasthan' %}selected{% endif %}>Rajasthan</option>
+            <option value="sikkim" {% if user.state == 'sikkim' %}selected{% endif %}>Sikkim</option>
+            <option value="tamil_nadu" {% if user.state == 'tamil_nadu' %}selected{% endif %}>Tamil Nadu</option>
+            <option value="telangana" {% if user.state == 'telangana' %}selected{% endif %}>Telangana</option>
+            <option value="tripura" {% if user.state == 'tripura' %}selected{% endif %}>Tripura</option>
+            <option value="uttar_pradesh" {% if user.state == 'uttar_pradesh' %}selected{% endif %}>Uttar Pradesh</option>
+            <option value="uttarakhand" {% if user.state == 'uttarakhand' %}selected{% endif %}>Uttarakhand</option>
+            <option value="west_bengal" {% if user.state == 'west_bengal' %}selected{% endif %}>West Bengal</option>
+
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Annual Income (₹)</label>
+          <input type="number" name="annual_income" value="{{ user.annual_income }}" step="1000"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Land Size (Acres)</label>
+          <input type="number" name="land_size" value="{{ user.land_size }}" step="0.1"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition" />
+        </div>
+
+        <div class="md:col-span-3 grid md:grid-cols-2 gap-6 pt-2">
+          
+          <div class="flex items-center justify-between bg-gray-50 p-4 rounded-lg border border-gray-200">
+            <div>
+              <span class="block text-sm font-bold text-gray-800">Are you a Tenant?</span>
+              <span class="text-xs text-gray-500">Do you rent the land you farm?</span>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" name="is_tenant" class="sr-only peer" {% if user.is_tenant %}checked{% endif %}>
+              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+            </label>
+          </div>
+
+          <div class="flex items-center justify-between bg-gray-50 p-4 rounded-lg border border-gray-200">
+            <div>
+              <span class="block text-sm font-bold text-gray-800">Bank Account</span>
+              <span class="text-xs text-gray-500">Do you have an active bank account?</span>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" name="has_bank_account" class="sr-only peer" {% if user.has_bank_account %}checked{% endif %}>
+              <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+            </label>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+
+      <div class="bg-gray-50 px-6 py-4 border-b border-gray-100 flex items-center gap-3">
+        <div class="bg-yellow-100 text-yellow-600 p-2 rounded-lg">
+          <i class="fas fa-seedling"></i>
+        </div>
+        <h2 class="text-lg font-bold text-gray-800">Crops Grown</h2>
+      </div>
+
+      <div class="p-6">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Add your crops (Press Enter or click Add)</label>
+        
+        <div class="flex gap-2 mb-4">
+          <input type="text" id="crop-input" placeholder="e.g. Paddy, Cotton, Chilli" 
+            class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition" />
+          <button type="button" id="add-crop-btn" class="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition">
+            Add
+          </button>
+        </div>
+
+        <div id="crops-container" class="flex flex-wrap gap-2 min-h-[40px] p-2 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+          <p id="no-crops-msg" class="text-gray-400 text-sm italic w-full text-center py-2">No crops added yet.</p>
+        </div>
+
+        <input type="hidden" name="crops" id="crops-hidden-input" value="">
+      </div>
+    </div>
+
+    <div class="flex justify-end gap-4 pt-4 pb-12">
+        <a href="/dashboard" class="px-6 py-3 rounded-xl border border-gray-300 text-gray-600 font-semibold hover:bg-gray-50 transition">
+            Cancel
+        </a>
+        <button type="submit" class="px-8 py-3 rounded-xl bg-green-600 text-white font-bold shadow-lg shadow-green-200 hover:bg-green-700 transition hover:scale-105 transform">
+            Save Changes
+        </button>
+    </div>
+
+  </form>
+</div>
+
+<script>
+    let crops = {{ user.crops | tojson | default([]) | safe }};
+    
+    const cropInput = document.getElementById('crop-input');
+    const addBtn = document.getElementById('add-crop-btn');
+    const container = document.getElementById('crops-container');
+    const hiddenInput = document.getElementById('crops-hidden-input');
+    const noCropsMsg = document.getElementById('no-crops-msg');
+
+    function renderChips() {
+        container.innerHTML = '';
+        
+        if (crops.length === 0) {
+            container.appendChild(noCropsMsg);
+            noCropsMsg.style.display = 'block';
+        } else {
+            noCropsMsg.style.display = 'none';
+            
+            crops.forEach((crop, index) => {
+                const chip = document.createElement('div');
+                chip.className = "flex items-center gap-2 bg-green-100 text-green-800 px-3 py-1.5 rounded-full text-sm font-semibold border border-green-200 animate-fade-in";
+                
+                chip.innerHTML = `
+                    <span>${crop}</span>
+                    <button type="button" onclick="removeCrop(${index})" class="w-5 h-5 flex items-center justify-center rounded-full bg-green-200 hover:bg-red-500 hover:text-white transition-colors text-xs">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                container.appendChild(chip);
+            });
+        }
+
+        hiddenInput.value = crops.join(','); 
+    }
+
+    function addCrop() {
+        const val = cropInput.value.trim();
+        if (val && !crops.includes(val)) {
+            crops.push(val);
+            renderChips();
+            cropInput.value = '';
+        } else if (crops.includes(val)) {
+            alert('Crop already added!');
+        }
+    }
+
+    window.removeCrop = function(index) {
+        crops.splice(index, 1);
+        renderChips();
+    };
+
+    addBtn.addEventListener('click', addCrop);
+    
+    cropInput.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            addCrop();
+        }
+    });
+
+    renderChips();
+</script>
+
+<style>
+    @keyframes fadeIn {
+        from { opacity: 0; transform: scale(0.9); }
+        to { opacity: 1; transform: scale(1); }
+    }
+    .animate-fade-in {
+        animation: fadeIn 0.2s ease-out;
+    }
+
+    @keyframes fadeInDown {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in-down {
+        animation: fadeInDown 0.4s ease-out;
+    }
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-slide-up {
+        animation: slideUp 0.3s ease-out;
+    }
+</style>
+{% endblock %}
