@@ -6,7 +6,7 @@
 
 ## 🌟 Project Overview
 
-Plantify is designed to bridge the digital divide in agriculture by empowering farmers with advanced technology. It provides a single platform that helps optimize farm productivity, make informed decisions, strategize against potential risks through 'What-If' simulations, anticipate market trends, and stay aligned with government programs, all while safeguarding crop health. Its simple, responsive, and multilingual interface ensures that cutting-edge agricultural insights are accessible to every farmer..
+Plantify is designed to bridge the digital divide in agriculture by empowering farmers with advanced technology. It provides a single platform that helps optimize farm productivity, make informed decisions, strategize against potential risks through 'What-If' simulations, anticipate market trends, and stay aligned with government programs, all while safeguarding crop health. Its simple, responsive, and multilingual interface ensures that cutting-edge agricultural insights are accessible to every farmer.
 
 ## ✨ Core Features & Functionality
 
@@ -100,3 +100,4 @@ See the [LICENSE](LICENSE) file for details.
 
 - [Mansi](https://github.com/C2HS0H)
 - [Yashika](https://github.com/yashikadave2023-wq)
+
